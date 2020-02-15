@@ -1,0 +1,83 @@
+plugins {
+	id "java";
+	id "maven-publish";
+}
+
+ext.moduleName = "jp.empressia.enterprise.security.oidc";
+// ext.upload_repository_url;
+// ext.version;
+
+repositories {
+	jcenter();
+}
+
+dependencies {
+	// use CDI.
+	implementation(group:"javax.enterprise", name:"cdi-api", version:"2.0.SP1");
+	// use Java EE Security API.
+	implementation(group:"javax.security.enterprise", name: "javax.security.enterprise-api", version:"1.0");
+	// use HttpServletRequest, HttpServletResponse
+	implementation(group:"javax.servlet", name: "javax.servlet-api", version:"4.0.1");
+	// use for security interceptor priority.
+	implementation(group:"javax.annotation", name:"javax.annotation-api", version:"1.3.2");
+	// use MicroProfile Config API.
+	implementation(group:"org.eclipse.microprofile.config", name:"microprofile-config-api", version:"1.3");
+	// use JCache for security token cache (not in Jave EE 8).
+	compileOnly(group:"javax.cache", name:"cache-api", version:"1.1.1");
+	// use for JWT.
+	runtimeOnly(group:"io.jsonwebtoken", name:"jjwt-impl", version:"0.10.7");
+	implementation(group:"io.jsonwebtoken", name:"jjwt-jackson", version:"0.10.7");
+}
+
+tasks.withType(JavaCompile) {
+	options.encoding "UTF-8";
+	options.compilerArgs << "-parameters";
+}
+
+jar {
+	archiveBaseName = moduleName;
+	manifest {
+		attributes (
+			"Automatic-Module-Name": moduleName
+		);
+	}
+}
+
+javadoc {
+	source = sourceSets.main.allJava;
+	options.charSet "UTF-8";
+	options.encoding "UTF-8";
+	options.addStringOption("Xdoclint:none", "-quiet");
+}
+task javadocJar(type: Jar) {
+	archiveBaseName = jar.archiveBaseName;
+	classifier "javadoc";
+	from javadoc.destinationDir;
+}
+javadocJar.dependsOn(tasks.javadoc);
+task sourcesJar(type: Jar) {
+	archiveBaseName = jar.archiveBaseName;
+	classifier "sources";
+	from sourceSets.main.allSource;
+}
+artifacts {
+	archives javadocJar;
+	archives sourcesJar;
+}
+
+publishing {
+	publications {
+		maven(MavenPublication) {
+			groupId = "jp.empressia";
+			artifactId = moduleName;
+			from components.java;
+			artifact javadocJar;
+			artifact sourcesJar;
+		}
+	}
+	repositories {
+		maven {
+			url = upload_repository_url;
+		}
+	}
+}
