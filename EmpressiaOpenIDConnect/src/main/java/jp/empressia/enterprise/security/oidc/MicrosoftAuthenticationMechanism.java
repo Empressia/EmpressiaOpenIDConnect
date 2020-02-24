@@ -140,26 +140,40 @@ public class MicrosoftAuthenticationMechanism extends OpenIDConnectAuthenticatio
 	 */
 	@Override
 	public void validateAccessToken(String access_token, String token_type, Jws<Claims> id_token, String requestedScope, String requestedNonce, OpenIDConnectCredential credential) {
-		JwtParser parser = Jwts.parser().deserializeJsonWith(new JacksonDeserializer<Map<String, ?>>(new ObjectMapper()))
-			// 今は、clinet_secretによる暗号化が行われている前提です。形式これで共通なのかな。
-			.setSigningKey(this.client_secret().getBytes(StandardCharsets.UTF_8))
-			// ライブラリの制限で1個の設定しか受けつけていない。
-			.requireIssuer(this.getIssuer())
-			// ライブラリの制限で全体一致の設定しか受けつけていない。MAC署名にしか対応していないなら、1個だけのはずだし、今は、いいよね。
-			.requireAudience(this.client_id());
+		// 個人アカウントを対象にしている場合は、不透明な文字列らしい。
+		if(this.getIssuer().equals(Settings.DEFAULT_Issuer)) { return; }
+		Key key;
+		{
+			String header = access_token.split("\\.")[0];
+			byte[] headerBytes = Base64.getUrlDecoder().decode(header);
+			JsonNode node;
+			try {
+				node = this.ObjectMapper.readTree(headerBytes);
+			} catch(IOException ex) {
+				throw new IllegalStateException("トークンレスポンスの検証用キーの取得に失敗しました。", ex);
+			}
+			String kid = node.has("kid") ? node.get("kid").asText() : null;
+			try {
+				key = this.PublicKeyHelper.getPubliKey(this.jwks_uri(), kid);
+			} catch(IOException | NoSuchAlgorithmException | InvalidKeySpecException | InterruptedException ex) {
+				throw new IllegalStateException("access_tokenの署名の確認に必要な鍵の取得に失敗しました。", ex);
+			}
+		}
+		JwtParser parser = Jwts.parser().deserializeJsonWith(new JacksonDeserializer<Map<String, ?>>(this.ObjectMapper));
+		parser = parser.setSigningKey(key);
 		Jws<Claims> jws = parser.parseClaimsJws(access_token);
 		JwsHeader<?> header = jws.getHeader();
 		{
 			String nonce = (String)header.get("nonce");
 			if(nonce.equals(requestedNonce) == false) {
-				throw new IllegalStateException("IDトークンが期待した形式ではありませんでした。");
+				throw new IllegalStateException("アクセストークンが期待した形式ではありませんでした。");
 			}
 		}
 		Claims claims = jws.getBody();
 		{
 			String scp = claims.get("scp", String.class);
 			if(scp.equals(requestedScope) == false) {
-				throw new IllegalStateException("IDトークンが期待した形式ではありませんでした。");
+				throw new IllegalStateException("アクセストークンが期待した形式ではありませんでした。");
 			}
 		}
 	}
