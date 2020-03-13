@@ -17,6 +17,7 @@ import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -335,7 +336,11 @@ public abstract class OpenIDConnectAuthenticationMechanism implements IOpenIDCon
 					return AuthenticationStatus.SEND_CONTINUE;
 				}
 			}
-			Map<String, String> cookies = Arrays.stream(request.getCookies()).collect(Collectors.toMap(c -> c.getName(), c -> c.getValue()));
+			Map<String, String> cookies;
+			{
+				Cookie[] cs = request.getCookies();
+				cookies = (cs != null) ? Arrays.stream(cs).collect(Collectors.toMap(c -> c.getName(), c -> c.getValue())) : Collections.emptyMap();
+			}
 			// from_postされたパラメーターは、エラーで維持されないように、すぐに破棄を登録しておく。
 			for(Map.Entry<String, String> cookie : cookies.entrySet()) {
 				if(
