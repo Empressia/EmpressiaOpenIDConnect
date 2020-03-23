@@ -3,6 +3,7 @@
 * [概要](#概要)
 * [使い方](#使い方)
 * [複数の実装クラスを同時に扱う方法](#複数の実装クラスを同時に扱う方法)
+* [Reverse Proxyの後ろで扱う方法](#Reverse Proxyの後ろで扱う方法)
 * [ライブラリの依存関係](#ライブラリの依存関係)
 * [制限事項](#制限事項)
 	* [このライブラリの制限](#このライブラリの制限)
@@ -35,12 +36,11 @@ Gradleであれば、例えば以下のように設定します。
 
 ```groovy
 	// use Empressia OpenID Connect.
-	implementation(group:"jp.empressia", name:"jp.empressia.enterprise.security.oidc", version:"1.0.1");
+	implementation(group:"jp.empressia", name:"jp.empressia.enterprise.security.oidc", version:"1.0.3");
 ```
 
-各サーバーに含まれるライブラリがある場合は、適宜、provided指定を追加してください。  
-例えば、以下のようにprovided指定を追加してください。  
-指定しない場合は、runtimeとして自動で追加されます。  
+使う場合は、関連したライブラリの依存関係も必要になると思います。
+例えば、以下のように追加してください。  
 
 ```groovy
 	// use CDI.
@@ -48,19 +48,21 @@ Gradleであれば、例えば以下のように設定します。
 	// use Java EE Security API.
 	providedCompile(group:"javax.security.enterprise", name: "javax.security.enterprise-api", version:"1.0");
 	// use HttpServletRequest, HttpServletResponse.
-	providedRuntime(group:"javax.servlet", name: "javax.servlet-api", version:"4.0.1");
+	// providedCompile(group:"javax.servlet", name: "javax.servlet-api", version:"4.0.1");
 	// use for security interceptor priority.
-	providedRuntime(group:"javax.annotation", name:"javax.annotation-api", version:"1.3.2");
+	// providedCompile(group:"javax.annotation", name:"javax.annotation-api", version:"1.3.2");
 	// use MicroProfile Config API.
-	providedRuntime(group:"org.eclipse.microprofile.config", name:"microprofile-config-api", version:"1.3");
+	// providedCompile(group:"org.eclipse.microprofile.config", name:"microprofile-config-api", version:"1.3");
 	// use JCache for security token cache (not in Jave EE 8).
-	// providedRuntime(group:"javax.cache", name:"cache-api", version:"1.1.1");
+	// providedCompile(group:"javax.cache", name:"cache-api", version:"1.1.1");
 	// use for JWT.
 	// providedRuntime(group:"io.jsonwebtoken", name:"jjwt-impl", version:"0.10.7");
 	// providedCompile(group:"io.jsonwebtoken", name:"jjwt-jackson", version:"0.10.7");
+	//  or
+	// implementation(group:"io.jsonwebtoken", name:"jjwt-jackson", version:"0.10.7");
 ```
 
-コメントアウトしてる部分は、通常そのままで平気だと思います。  
+コメントアウトしてる部分は、依存関係の宣言が必ず必要というわけではないかと思います。  
 
 ### OpenIDConnectAuthenticationMechanismを用意します。
 
@@ -347,6 +349,23 @@ jp.empressia.enterprise.security.oidc.MultipleIssuers.RedirectIssuerNotSelectedH
 この場合、認証をしないパスには、  
 Issuerの選択に使用するURL（HTMLやjsとか）を指定しています。  
 Issuerの選択結果は認証の処理になるのでIgnoreには追加しません。  
+
+## Reverse Proxyの後ろで扱う方法
+
+Reverse Proxyで使用する場合、そのままの設定だと、  
+redirect_uriのAuthorityが、『localhost:8080』などになります。  
+
+これを調整する場合は、例えば、以下のようにhandleAuthenticatedURLメソッドをオーバーライドします。  
+
+```java
+				new MicrosoftAuthenticationMechanism(this.MicrosoftSettings, IdentityStoreHandler, PublicKeyHelper) {
+					@Override
+					protected String handleAuthenticatedURL(String URL) {
+						String scheme = this.useSecureCookie() ? "https" : "http";
+						return scheme + "://" + "Authority" + this.getAuthenticatedURLPath();
+					}
+				}
+```
 
 ## ライブラリの依存関係
 
