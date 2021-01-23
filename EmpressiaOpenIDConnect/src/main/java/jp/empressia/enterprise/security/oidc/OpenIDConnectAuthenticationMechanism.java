@@ -910,7 +910,7 @@ public abstract class OpenIDConnectAuthenticationMechanism implements IOpenIDCon
 	}
 
 	/** nonceを生成します。 */
-	protected String generateNonce(HttpServletRequest request, HttpServletResponse reponse, HttpMessageContext httpMessageContext) {
+	protected String generateNonce(HttpServletRequest request, HttpServletResponse response, HttpMessageContext httpMessageContext) {
 		String nonce = OpenIDConnectUtilities.generateNonce();
 		return nonce;
 	}
