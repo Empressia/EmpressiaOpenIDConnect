@@ -186,6 +186,30 @@ public abstract class OpenIDConnectAuthenticationMechanism implements IOpenIDCon
 	public Pattern getIgnoreAuthenticationURLPathRegex() { return this.IgnoreAuthenticationURLPathRegex; }
 
 	/**
+	 * Authorization Requestを作成して適用します。
+	 * 必要なパラメーターの生成や保存も行い、レスポンスを設定します。
+	 * レスポンスは引数に対して設定を行います。
+	 */
+	protected void handleAuthorizationrequest(HttpServletRequest request, HttpServletResponse response, HttpMessageContext httpMessageContext) {
+		String scope = this.scope();
+		String URLBase = request.getRequestURL().substring(0, request.getRequestURL().lastIndexOf(request.getRequestURI()));
+		String redirect_uri = this.handleAuthenticatedURL(URLBase + this.getAuthenticatedURLPath());
+		String state = this.generateState();
+		String nonce = this.generateNonce(request, response, httpMessageContext);
+		String url = this.createAuthorizationRequestURL(scope, redirect_uri, state, nonce);
+		Cookie scopeCookie = IOpenIDConnectAuthenticationMechanism.createCookie(this.scopeCookieName(), scope, this.getAuthenticatedURLPath(), this.useSecureCookie());
+		response.addCookie(scopeCookie);
+		Cookie redirect_uriCookie = IOpenIDConnectAuthenticationMechanism.createCookie(this.redirect_uriCookieName(), redirect_uri, this.getAuthenticatedURLPath(), this.useSecureCookie());
+		response.addCookie(redirect_uriCookie);
+		Cookie stateCookie = IOpenIDConnectAuthenticationMechanism.createCookie(this.stateCookieName(), state, this.getAuthenticatedURLPath(), this.useSecureCookie());
+		response.addCookie(stateCookie);
+		Cookie nonceCookie = IOpenIDConnectAuthenticationMechanism.createCookie(this.nonceCookieName(), nonce, this.getAuthenticatedURLPath(), this.useSecureCookie());
+		response.addCookie(nonceCookie);
+		response.setStatus(303);
+		response.setHeader("Location", url);
+	}
+
+	/**
 	 * Authorization Requestに使用するQueryParameterを調整します。
 	 * state、response_mode、nonceを除く、Optionalなパラメーターの設定用です。
 	 * 例えば、login_hint、prompt、とかを設定します。
@@ -518,22 +542,7 @@ public abstract class OpenIDConnectAuthenticationMechanism implements IOpenIDCon
 				}
 			}
 		}
-		String scope = this.scope();
-		String URLBase = request.getRequestURL().substring(0, request.getRequestURL().lastIndexOf(request.getRequestURI()));
-		String redirect_uri = this.handleAuthenticatedURL(URLBase + this.getAuthenticatedURLPath());
-		String state = this.generateState();
-		String nonce = this.generateNonce(request, response, httpMessageContext);
-		String url = this.createAuthorizationRequestURL(scope, redirect_uri, state, nonce);
-		Cookie scopeCookie = IOpenIDConnectAuthenticationMechanism.createCookie(this.scopeCookieName(), scope, this.getAuthenticatedURLPath(), this.useSecureCookie());
-		response.addCookie(scopeCookie);
-		Cookie redirect_uriCookie = IOpenIDConnectAuthenticationMechanism.createCookie(this.redirect_uriCookieName(), redirect_uri, this.getAuthenticatedURLPath(), this.useSecureCookie());
-		response.addCookie(redirect_uriCookie);
-		Cookie stateCookie = IOpenIDConnectAuthenticationMechanism.createCookie(this.stateCookieName(), state, this.getAuthenticatedURLPath(), this.useSecureCookie());
-		response.addCookie(stateCookie);
-		Cookie nonceCookie = IOpenIDConnectAuthenticationMechanism.createCookie(this.nonceCookieName(), nonce, this.getAuthenticatedURLPath(), this.useSecureCookie());
-		response.addCookie(nonceCookie);
-		response.setStatus(303);
-		response.setHeader("Location", url);
+		this.handleAuthorizationrequest(request, response, httpMessageContext);
 		return AuthenticationStatus.SEND_CONTINUE;
 	}
 
