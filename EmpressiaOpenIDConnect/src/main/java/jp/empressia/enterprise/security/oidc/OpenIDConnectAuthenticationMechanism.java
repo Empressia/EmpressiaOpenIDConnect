@@ -190,7 +190,7 @@ public abstract class OpenIDConnectAuthenticationMechanism implements IOpenIDCon
 	 * 必要なパラメーターの生成や保存も行い、レスポンスを設定します。
 	 * レスポンスは引数に対して設定を行います。
 	 */
-	protected void handleAuthorizationrequest(HttpServletRequest request, HttpServletResponse response, HttpMessageContext httpMessageContext) {
+	protected void handleAuthorizationRequest(HttpServletRequest request, HttpServletResponse response, HttpMessageContext httpMessageContext) {
 		String scope = this.scope();
 		String URLBase = request.getRequestURL().substring(0, request.getRequestURL().lastIndexOf(request.getRequestURI()));
 		String redirect_uri = this.handleAuthenticatedURL(URLBase + this.getAuthenticatedURLPath());
@@ -542,7 +542,7 @@ public abstract class OpenIDConnectAuthenticationMechanism implements IOpenIDCon
 				}
 			}
 		}
-		this.handleAuthorizationrequest(request, response, httpMessageContext);
+		this.handleAuthorizationRequest(request, response, httpMessageContext);
 		return AuthenticationStatus.SEND_CONTINUE;
 	}
 
