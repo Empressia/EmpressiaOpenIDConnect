@@ -4,6 +4,7 @@
 * [使い方](#使い方)
 * [複数の実装クラスを同時に扱う方法](#複数の実装クラスを同時に扱う方法)
 * [Reverse Proxyの後ろで扱う方法](#Reverse Proxyの後ろで扱う方法)
+* [トークンを取得する処理を非同期に変更する方法](#トークンを取得する処理を非同期に変更する方法)
 * [ライブラリの依存関係](#ライブラリの依存関係)
 * [制限事項](#制限事項)
 	* [このライブラリの制限](#このライブラリの制限)
@@ -85,7 +86,7 @@ Gradleであれば、例えば以下のように設定します。
 public class ApplicationAuthenticationMechanism extends MicrosoftAuthenticationMechanism {
 	@Inject
 	public ApplicationAuthenticationMechanism(Settings settings, IdentityStoreHandler IdentityStoreHandler, PublicKeyHelper PublicKeyHelper) {
-		super(settings, IdentityStoreHandler, PublicKeyHelper);
+		super(settings, IdentityStoreHandler, null, PublicKeyHelper);
 	}
 }
 ```
@@ -288,7 +289,7 @@ public class ApplicationAuthenticationMechanism extends MultipleIssuersOpenIDCon
 			this.LINESettings = LINESettings;
 			this.MicrosoftSettings = MicrosoftSettings;
 			this.Mechanisms = Set.<IOpenIDConnectAuthenticationMechanism>of(
-				new GoogleAuthenticationMechanism(this.GoogleSettings, IdentityStoreHandler, PublicKeyHelper) {
+				new GoogleAuthenticationMechanism(this.GoogleSettings, IdentityStoreHandler, null, PublicKeyHelper) {
 					@Override
 					protected LinkedHashMap<String, String> handleAuthorizationRequestParameters(LinkedHashMap<String, String> parameters) {
 						parameters.put("access_type", "offline");
@@ -296,8 +297,8 @@ public class ApplicationAuthenticationMechanism extends MultipleIssuersOpenIDCon
 						return parameters;
 					}
 				},
-				new LINEAuthenticationMechanism(this.LINESettings, IdentityStoreHandler),
-				new MicrosoftAuthenticationMechanism(this.MicrosoftSettings, IdentityStoreHandler, PublicKeyHelper)
+				new LINEAuthenticationMechanism(this.LINESettings, IdentityStoreHandler, null),
+				new MicrosoftAuthenticationMechanism(this.MicrosoftSettings, IdentityStoreHandler, null, PublicKeyHelper)
 			);
 		}
 
@@ -366,6 +367,12 @@ redirect_uriのAuthorityが、『localhost:8080』などになります。
 					}
 				}
 ```
+
+## トークンを取得する処理を非同期に変更する方法
+
+上記までの説明で、各Mechanismの引数にnullが設定されていますが、  
+そこにExecutorServiceを設定することで、トークンを取得する処理が非同期になります。  
+nullだと、同期処理になります。  
 
 ## ライブラリの依存関係
 

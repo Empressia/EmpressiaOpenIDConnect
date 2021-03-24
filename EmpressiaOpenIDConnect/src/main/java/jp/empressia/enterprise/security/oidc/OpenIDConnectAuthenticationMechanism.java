@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -247,6 +248,8 @@ public abstract class OpenIDConnectAuthenticationMechanism implements IOpenIDCon
 	/** Java EE Security API（Jakarta Security）で管理されるストアへのHandler。 */
 	private IdentityStoreHandler IdentityStoreHandler;
 
+	/** トークンエンドポイントへアクセスするためのHTTPクライアント用のExecutorService。ない場合は同期処理にします。 */
+	private ExecutorService HTTPExecutorServie;
 	/** トークンエンドポイントへアクセスするためのHTTPクライアント。 */
 	private HttpClient HTTPClient;
 
@@ -254,7 +257,7 @@ public abstract class OpenIDConnectAuthenticationMechanism implements IOpenIDCon
 	private String TokenCookieName;
 
 	/** コンストラクタ。 */
-	public OpenIDConnectAuthenticationMechanism(Settings settings, IdentityStoreHandler IdentityStoreHandler) {
+	public OpenIDConnectAuthenticationMechanism(Settings settings, IdentityStoreHandler IdentityStoreHandler, ExecutorService executorService) {
 		{
 			this.Issuer = settings.getIssuer();
 			this.AuthorizationEndpoint = settings.getAuthorizationEndpoint();
@@ -292,6 +295,10 @@ public abstract class OpenIDConnectAuthenticationMechanism implements IOpenIDCon
 					builder.proxy(ProxySelector.of(new InetSocketAddress(this.proxyHost(), this.proxyPort())));
 				}
 			}
+			if(executorService != null) {
+				builder.executor(executorService);
+			}
+			this.HTTPExecutorServie = executorService;
 			this.HTTPClient = builder.build();
 			this.TokenCookieName = this.getClass().getAnnotation(RememberMe.class).cookieName();
 		}
@@ -557,12 +564,20 @@ public abstract class OpenIDConnectAuthenticationMechanism implements IOpenIDCon
 			.setHeader("Content-Type", "application/x-www-form-urlencoded")
 			.POST(HttpRequest.BodyPublishers.ofString(requestBody))
 			.build();
-		var task = this.HTTPClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
 		HttpResponse<InputStream> response;
-		try {
-			response = task.get();
-		} catch(InterruptedException | ExecutionException ex) {
-			throw new IllegalStateException("アクセストークンの取得に失敗しました。", ex);
+		if(this.HTTPExecutorServie == null) {
+			try {
+				response = this.HTTPClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+			} catch(InterruptedException | IOException ex) {
+				throw new IllegalStateException("アクセストークンの取得に失敗しました。", ex);
+			}
+		} else {
+			var task = this.HTTPClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
+			try {
+				response = task.get();
+			} catch(InterruptedException | ExecutionException ex) {
+				throw new IllegalStateException("アクセストークンの取得に失敗しました。", ex);
+			}
 		}
 		if(response.statusCode() == 400) {
 			return this.handleTokenErrorResponse(request, response);
@@ -601,12 +616,20 @@ public abstract class OpenIDConnectAuthenticationMechanism implements IOpenIDCon
 			.setHeader("Content-Type", "application/x-www-form-urlencoded")
 			.POST(HttpRequest.BodyPublishers.ofString(requestBody))
 			.build();
-		var task = this.HTTPClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
 		HttpResponse<InputStream> response;
-		try {
-			response = task.get();
-		} catch(InterruptedException | ExecutionException ex) {
-			throw new IllegalStateException("アクセストークンの取得に失敗しました。", ex);
+		if(this.HTTPExecutorServie == null) {
+			try {
+				response = this.HTTPClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+			} catch(InterruptedException | IOException ex) {
+				throw new IllegalStateException("アクセストークンの取得に失敗しました。", ex);
+			}
+		} else {
+			var task = this.HTTPClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
+			try {
+				response = task.get();
+			} catch(InterruptedException | ExecutionException ex) {
+				throw new IllegalStateException("アクセストークンの取得に失敗しました。", ex);
+			}
 		}
 		if(response.statusCode() == 400) {
 			return this.handleRefreshErrorResponse(request, response);
@@ -637,12 +660,20 @@ public abstract class OpenIDConnectAuthenticationMechanism implements IOpenIDCon
 			.setHeader("Content-Type", "application/x-www-form-urlencoded")
 			.POST(HttpRequest.BodyPublishers.ofString(requestBody))
 			.build();
-		var task = this.HTTPClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
 		HttpResponse<InputStream> response;
-		try {
-			response = task.get();
-		} catch(InterruptedException | ExecutionException ex) {
-			throw new IllegalStateException("アクセストークンの取得に失敗しました。", ex);
+		if(this.HTTPExecutorServie == null) {
+			try {
+				response = this.HTTPClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+			} catch(InterruptedException | IOException ex) {
+				throw new IllegalStateException("アクセストークンの取得に失敗しました。", ex);
+			}
+		} else {
+			var task = this.HTTPClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
+			try {
+				response = task.get();
+			} catch(InterruptedException | ExecutionException ex) {
+				throw new IllegalStateException("アクセストークンの取得に失敗しました。", ex);
+			}
 		}
 		if(response.statusCode() == 400) {
 			return this.handleRevocationErrorResponse(request, response);

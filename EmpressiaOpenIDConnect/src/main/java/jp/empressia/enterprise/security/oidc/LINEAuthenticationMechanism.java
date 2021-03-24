@@ -2,6 +2,7 @@ package jp.empressia.enterprise.security.oidc;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -41,8 +42,8 @@ public class LINEAuthenticationMechanism extends OpenIDConnectAuthenticationMech
 
 	/** コンストラクタ。 */
 	@Inject
-	public LINEAuthenticationMechanism(Settings settings, IdentityStoreHandler IdentityStoreHandler) {
-		super(settings, IdentityStoreHandler);
+	public LINEAuthenticationMechanism(Settings settings, IdentityStoreHandler IdentityStoreHandler, ExecutorService executorService) {
+		super(settings, IdentityStoreHandler, executorService);
 	}
 
 	/** 必須じゃないけど、呼ぶと、ある程度の設定を確認します。 */

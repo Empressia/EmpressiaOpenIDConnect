@@ -7,6 +7,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -59,8 +60,8 @@ public class MicrosoftAuthenticationMechanism extends OpenIDConnectAuthenticatio
 
 	/** コンストラクタ。 */
 	@Inject
-	public MicrosoftAuthenticationMechanism(Settings settings, IdentityStoreHandler IdentityStoreHandler, PublicKeyHelper PublicKeyHelper) {
-		super(settings, IdentityStoreHandler);
+	public MicrosoftAuthenticationMechanism(Settings settings, IdentityStoreHandler IdentityStoreHandler, ExecutorService executorService, PublicKeyHelper PublicKeyHelper) {
+		super(settings, IdentityStoreHandler, executorService);
 		this.PublicKeyHelper = PublicKeyHelper;
 		this.jwks_uri = settings.jwks_uri();
 	}
