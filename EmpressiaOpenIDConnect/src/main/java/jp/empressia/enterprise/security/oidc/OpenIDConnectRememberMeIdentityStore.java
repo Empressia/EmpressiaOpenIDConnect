@@ -179,3 +179,12 @@ public abstract class OpenIDConnectRememberMeIdentityStore implements RememberMe
 	}
 
 }
+
+// readmeへ
+// 戻り先を調整したい場合、
+// 認証リクエストに対して、追加の処理リクエストの保存とかしたい場合、
+// リバースプロキシの後ろに配置する場合、
+
+// 明確にログアウトする場合は、トークンのキャッシュを忘れないように消します。
+// DBからのトークン削除の後にキャッシュからも消しましょう。
+// this.TokenCache.remove(token);

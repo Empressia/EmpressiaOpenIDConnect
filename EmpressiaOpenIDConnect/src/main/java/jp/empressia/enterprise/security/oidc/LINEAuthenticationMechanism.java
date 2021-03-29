@@ -152,6 +152,9 @@ public class LINEAuthenticationMechanism extends OpenIDConnectAuthenticationMech
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.LINE.UseProxy", defaultValue="") String UseProxy,
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.LINE.ProxyHost", defaultValue="") String ProxyHost,
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.LINE.ProxyPort", defaultValue="") String ProxyPort,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.LINE.ConnectTimeout", defaultValue="") String ConnectTimeout,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.LINE.ReadTimeout", defaultValue="") String ReadTimeout,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.LINE.UseThreadPool", defaultValue="") String UseThreadPool,
 
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.LINE.AuthenticatedURLPath") String AuthenticatedURLPath,
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.IgnoreAuthenticationURLPaths", defaultValue="") String IgnoreAuthenticationURLPaths,
@@ -167,7 +170,7 @@ public class LINEAuthenticationMechanism extends OpenIDConnectAuthenticationMech
 				client_id, ClientAuthenticaitonMethod, client_secret,
 				UseSecureCookie, TokenCookieMaxAge, scopeCookieName, redirect_uriCookieName, stateCookieName, nonceCookieName, request_pathCookieName, form_postParameterCookiePrefixName,
 				AllowedIssuanceDuration,
-				UseProxy, ProxyHost, ProxyPort,
+				UseProxy, ProxyHost, ProxyPort, ConnectTimeout, ReadTimeout, UseThreadPool,
 				AuthenticatedURLPath, IgnoreAuthenticationURLPaths, IgnoreAuthenticationURLPathRegex
 			);
 		}

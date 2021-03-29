@@ -343,6 +343,9 @@ public class MicrosoftAuthenticationMechanism extends OpenIDConnectAuthenticatio
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.UseProxy", defaultValue="") String UseProxy,
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.ProxyHost", defaultValue="") String ProxyHost,
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.ProxyPort", defaultValue="") String ProxyPort,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.ConnectTimeout", defaultValue="") String ConnectTimeout,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.ReadTimeout", defaultValue="") String ReadTimeout,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.UseThreadPool", defaultValue="") String UseThreadPool,
 
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.AuthenticatedURLPath") String AuthenticatedURLPath,
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.IgnoreAuthenticationURLPaths", defaultValue="") String IgnoreAuthenticationURLPaths,
@@ -361,7 +364,7 @@ public class MicrosoftAuthenticationMechanism extends OpenIDConnectAuthenticatio
 				client_id, ClientAuthenticaitonMethod, client_secret,
 				UseSecureCookie, TokenCookieMaxAge, scopeCookieName, redirect_uriCookieName, stateCookieName, nonceCookieName, request_pathCookieName, form_postParameterCookiePrefixName,
 				AllowedIssuanceDuration,
-				UseProxy, ProxyHost, ProxyPort,
+				UseProxy, ProxyHost, ProxyPort, ConnectTimeout, ReadTimeout, UseThreadPool,
 				AuthenticatedURLPath, IgnoreAuthenticationURLPaths, IgnoreAuthenticationURLPathRegex
 			);
 			this.jwks_uri = ((jwks_uri != null) && (jwks_uri.isEmpty() == false)) ? URI.create(jwks_uri) : URI.create(DEFAULT_jwks_uri);

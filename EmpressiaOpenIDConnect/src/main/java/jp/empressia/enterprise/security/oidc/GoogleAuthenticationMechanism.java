@@ -192,6 +192,9 @@ public class GoogleAuthenticationMechanism extends OpenIDConnectAuthenticationMe
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.UseProxy", defaultValue="") String UseProxy,
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.ProxyHost", defaultValue="") String ProxyHost,
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.ProxyPort", defaultValue="") String ProxyPort,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.ConnectTimeout", defaultValue="") String ConnectTimeout,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.ReadTimeout", defaultValue="") String ReadTimeout,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.UseThreadPool", defaultValue="") String UseThreadPool,
 
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.AuthenticatedURLPath") String AuthenticatedURLPath,
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.IgnoreAuthenticationURLPaths", defaultValue="") String IgnoreAuthenticationURLPaths,
@@ -209,7 +212,7 @@ public class GoogleAuthenticationMechanism extends OpenIDConnectAuthenticationMe
 				client_id, ClientAuthenticaitonMethod, client_secret,
 				UseSecureCookie, TokenCookieMaxAge, scopeCookieName, redirect_uriCookieName, stateCookieName, nonceCookieName, request_pathCookieName, form_postParameterCookiePrefixName,
 				AllowedIssuanceDuration,
-				UseProxy, ProxyHost, ProxyPort,
+				UseProxy, ProxyHost, ProxyPort, ConnectTimeout, ReadTimeout, UseThreadPool,
 				AuthenticatedURLPath, IgnoreAuthenticationURLPaths, IgnoreAuthenticationURLPathRegex
 			);
 			this.jwks_uri = ((jwks_uri != null) && (jwks_uri.isEmpty() == false)) ? URI.create(jwks_uri) : DEFAULT_jwks_uri;

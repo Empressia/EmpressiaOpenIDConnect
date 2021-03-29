@@ -14,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.MessageFormat;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Base64;
@@ -171,6 +172,18 @@ public abstract class OpenIDConnectAuthenticationMechanism implements IOpenIDCon
 	private final int ProxyPort;
 	/** TokenEndpointとかへの接続でProxyを使用する場合のポートです。初期値は80です。 */
 	public int proxyPort() { return this.ProxyPort; }
+	/** TokenEndpointとかへの接続で接続を待機する秒数です。初期値は3です。 */
+	private final int ConnectTimeout;
+	/** TokenEndpointとかへの接続で接続を待機する秒数です。初期値は3です。 */
+	public int connectTimeout() { return this.ConnectTimeout; }
+	/** TokenEndpointとかへの接続で読み込みを待機する秒数です（実際にはConnectTimeoutと合計されてリクエストタイムアウトとして扱われます）。初期値は5です。 */
+	private final int ReadTimeout;
+	/** TokenEndpointとかへの接続で読み込みを待機する秒数です（実際にはConnectTimeoutと合計されてリクエストタイムアウトとして扱われます）。初期値は5です。 */
+	public int readTimeout() { return this.ReadTimeout; }
+	/** TokenEndpointとかへの接続でスレッドプールを使用するかどうかを表現します。初期値はtrueです。 */
+	private boolean UseThreadPool;
+	/** TokenEndpointとかへの接続でスレッドプールを使用するかどうかを表現します。初期値はtrueです。 */
+	public boolean useThreadPool() { return this.UseThreadPool; }
 
 	/** 『/』で始まる、認証を完了して認証サーバーからリダイレクトされてきた時のURLパスです。『/』より手前は自動で設定されます。 */
 	private final String AuthenticatedURLPath;
@@ -248,10 +261,10 @@ public abstract class OpenIDConnectAuthenticationMechanism implements IOpenIDCon
 	/** Java EE Security API（Jakarta Security）で管理されるストアへのHandler。 */
 	private IdentityStoreHandler IdentityStoreHandler;
 
-	/** トークンエンドポイントへアクセスするためのHTTPクライアント用のExecutorService。ない場合は同期処理にします。 */
-	private ExecutorService HTTPExecutorServie;
 	/** トークンエンドポイントへアクセスするためのHTTPクライアント。 */
 	private HttpClient HTTPClient;
+	/** トークンエンドポイントへの接続でリクエストを待機する秒数です。基本は、ConnectTimeoutとReadTimeoutの合計です。 */
+	private Duration RequestTimeout;
 
 	/** トークンに使用するクッキーの名前です。 */
 	private String TokenCookieName;
@@ -281,6 +294,8 @@ public abstract class OpenIDConnectAuthenticationMechanism implements IOpenIDCon
 			this.UseProxy = settings.useProxy();
 			this.ProxyHost = settings.proxyHost();
 			this.ProxyPort = settings.proxyPort();
+			this.ConnectTimeout = settings.connectTimeout();
+			this.ReadTimeout = settings.readTimeout();
 			this.AuthenticatedURLPath = settings.getAuthenticatedURLPath();
 			this.IgnoreAuthenticationURLPaths = settings.getIgnoreAuthenticationURLPaths();
 			this.IgnoreAuthenticationURLPathRegex = settings.getIgnoreAuthenticationURLPathRegex();
@@ -295,11 +310,12 @@ public abstract class OpenIDConnectAuthenticationMechanism implements IOpenIDCon
 					builder.proxy(ProxySelector.of(new InetSocketAddress(this.proxyHost(), this.proxyPort())));
 				}
 			}
+			builder.connectTimeout(Duration.ofSeconds(this.ConnectTimeout));
 			if(executorService != null) {
 				builder.executor(executorService);
 			}
-			this.HTTPExecutorServie = executorService;
 			this.HTTPClient = builder.build();
+			this.RequestTimeout = Duration.ofSeconds(this.ConnectTimeout + this.ReadTimeout);
 			this.TokenCookieName = this.getClass().getAnnotation(RememberMe.class).cookieName();
 		}
 	}
@@ -561,11 +577,12 @@ public abstract class OpenIDConnectAuthenticationMechanism implements IOpenIDCon
 		HttpRequest.Builder builder = HttpRequest.newBuilder(this.getTokenEndpoint());
 		builder = this.modifyTokenRequest(builder);
 		HttpRequest request = builder
+			.timeout(this.RequestTimeout)
 			.setHeader("Content-Type", "application/x-www-form-urlencoded")
 			.POST(HttpRequest.BodyPublishers.ofString(requestBody))
 			.build();
 		HttpResponse<InputStream> response;
-		if(this.HTTPExecutorServie == null) {
+		if(this.useThreadPool() == false) {
 			try {
 				response = this.HTTPClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
 			} catch(InterruptedException | IOException ex) {
@@ -613,11 +630,12 @@ public abstract class OpenIDConnectAuthenticationMechanism implements IOpenIDCon
 		HttpRequest.Builder builder = HttpRequest.newBuilder(this.getTokenEndpoint());
 		builder = this.modifyRefreshRequest(builder);
 		HttpRequest request = builder
+			.timeout(this.RequestTimeout)
 			.setHeader("Content-Type", "application/x-www-form-urlencoded")
 			.POST(HttpRequest.BodyPublishers.ofString(requestBody))
 			.build();
 		HttpResponse<InputStream> response;
-		if(this.HTTPExecutorServie == null) {
+		if(this.useThreadPool() == false) {
 			try {
 				response = this.HTTPClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
 			} catch(InterruptedException | IOException ex) {
@@ -657,11 +675,12 @@ public abstract class OpenIDConnectAuthenticationMechanism implements IOpenIDCon
 		HttpRequest.Builder builder = HttpRequest.newBuilder(this.getRevocationEndpoint());
 		builder = this.modifyRefreshRequest(builder);
 		HttpRequest request = builder
+			.timeout(this.RequestTimeout)
 			.setHeader("Content-Type", "application/x-www-form-urlencoded")
 			.POST(HttpRequest.BodyPublishers.ofString(requestBody))
 			.build();
 		HttpResponse<InputStream> response;
-		if(this.HTTPExecutorServie == null) {
+		if(this.useThreadPool() == false) {
 			try {
 				response = this.HTTPClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
 			} catch(InterruptedException | IOException ex) {
@@ -1224,6 +1243,24 @@ public abstract class OpenIDConnectAuthenticationMechanism implements IOpenIDCon
 		public int proxyPort() { return this.ProxyPort; }
 		/** TokenEndpointとかへの接続でProxyを使用する場合のポートです。初期値は80です。 */
 		public void proxyPort(int ProxyPort) { this.ProxyPort = ProxyPort; }
+		/** TokenEndpointとかへの接続で接続を待機する秒数です。初期値は3です。 */
+		private int ConnectTimeout;
+		/** TokenEndpointとかへの接続で接続を待機する秒数です。初期値は3です。 */
+		public int connectTimeout() { return this.ConnectTimeout; }
+		/** TokenEndpointとかへの接続で接続を待機する秒数です。初期値は3です。 */
+		public void connectTimeout(int ConnectTimeout) { this.ConnectTimeout = ConnectTimeout; }
+		/** TokenEndpointとかへの接続で読み込みを待機する秒数です（実際にはConnectTimeoutと合計されてリクエストタイムアウトとして扱われます）。初期値は5です。 */
+		private int ReadTimeout;
+		/** TokenEndpointとかへの接続で読み込みを待機する秒数です（実際にはConnectTimeoutと合計されてリクエストタイムアウトとして扱われます）。初期値は5です。 */
+		public int readTimeout() { return this.ReadTimeout; }
+		/** TokenEndpointとかへの接続で読み込みを待機する秒数です（実際にはConnectTimeoutと合計されてリクエストタイムアウトとして扱われます）。初期値は5です。 */
+		public void readTimeout(int ReadTimeout) { this.ReadTimeout = ReadTimeout; }
+		/** TokenEndpointとかへの接続でスレッドプールを使用するかどうかを表現します。初期値はtrueです。 */
+		private boolean UseThreadPool;
+		/** TokenEndpointとかへの接続でスレッドプールを使用するかどうかを表現します。初期値はtrueです。 */
+		public boolean useThreadPool() { return this.UseThreadPool; }
+		/** TokenEndpointとかへの接続でスレッドプールを使用するかどうかを表現します。初期値はtrueです。 */
+		public void useThreadPool(boolean UseThreadPool) { this.UseThreadPool = UseThreadPool; }
 
 		/** 『/』で始まる、認証を完了して認証サーバーからリダイレクトされてきた時のURLパスです。『/』より手前は自動で設定されます。 */
 		private String AuthenticatedURLPath;
@@ -1258,6 +1295,9 @@ public abstract class OpenIDConnectAuthenticationMechanism implements IOpenIDCon
 		public static final int DEFAULT_AllowedIssuanceDuration = 0;
 		public static final boolean DEFAULT_UseProxy = false;
 		public static final int DEFAULT_ProxyPort = 80;
+		public static final int DEFAULT_ConnectTimeout = 3;
+		public static final int DEFAULT_ReadTimeout = 5;
+		public static final boolean DEFAULT_UseThreadPool = true;
 
 		/** コンストラクタ。 */
 		@Inject
@@ -1290,6 +1330,9 @@ public abstract class OpenIDConnectAuthenticationMechanism implements IOpenIDCon
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.UseProxy", defaultValue="") String UseProxy,
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.ProxyHost", defaultValue="") String ProxyHost,
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.ProxyPort", defaultValue="") String ProxyPort,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.ConnectTimeout", defaultValue="") String ConnectTimeout,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.ReadTimeout", defaultValue="") String ReadTimeout,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.UseThreadPool", defaultValue="") String UseThreadPool,
 
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.AuthenticatedURLPath") String AuthenticatedURLPath,
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.IgnoreAuthenticationURLPaths", defaultValue="") String IgnoreAuthenticationURLPaths,
@@ -1317,6 +1360,9 @@ public abstract class OpenIDConnectAuthenticationMechanism implements IOpenIDCon
 			this.UseProxy = ((UseProxy != null) && (UseProxy.isEmpty() == false)) ? Boolean.parseBoolean(UseProxy) : DEFAULT_UseProxy;
 			this.ProxyHost = ((ProxyHost != null) && (ProxyHost.isEmpty() == false)) ? ProxyHost : null;
 			this.ProxyPort = ((ProxyPort != null) && (ProxyPort.isEmpty() == false)) ? Integer.parseInt(ProxyPort) : DEFAULT_ProxyPort;
+			this.ConnectTimeout = ((ConnectTimeout != null) && (ConnectTimeout.isEmpty() == false)) ? Integer.parseInt(ConnectTimeout) : DEFAULT_ConnectTimeout;
+			this.ReadTimeout = ((ReadTimeout != null) && (ReadTimeout.isEmpty() == false)) ? Integer.parseInt(ReadTimeout) : DEFAULT_ReadTimeout;
+			this.UseThreadPool = ((UseThreadPool != null) && (UseThreadPool.isEmpty() == false)) ? Boolean.parseBoolean(UseThreadPool) : DEFAULT_UseThreadPool;
 			this.AuthenticatedURLPath = ((AuthenticatedURLPath != null) && (AuthenticatedURLPath.isEmpty() == false)) ? AuthenticatedURLPath : null;
 			this.IgnoreAuthenticationURLPaths = ((IgnoreAuthenticationURLPaths != null) && (IgnoreAuthenticationURLPaths.isEmpty() == false)) ? IgnoreAuthenticationURLPaths.split("\\s*,\\s*") : null;
 			this.IgnoreAuthenticationURLPathRegex = ((IgnoreAuthenticationURLPathRegex != null) && (IgnoreAuthenticationURLPathRegex.isEmpty() == false)) ? Pattern.compile(IgnoreAuthenticationURLPathRegex) : null;
