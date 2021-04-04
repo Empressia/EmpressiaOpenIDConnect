@@ -9,7 +9,7 @@ ext.moduleName = "jp.empressia.enterprise.security.oidc";
 // ext.version;
 
 repositories {
-	jcenter();
+	mavenCentral();
 }
 
 dependencies {
