@@ -5,7 +5,7 @@ plugins {
 }
 
 ext.moduleName = "jp.empressia.enterprise.security.oidc";
-// ext.upload_repository_url;
+// ext.local_network_repository_url;
 // ext.version;
 
 repositories {
@@ -39,6 +39,7 @@ java {
 	withJavadocJar();
 	withSourcesJar();
 }
+
 jar {
 	archiveBaseName = moduleName;
 	manifest {
