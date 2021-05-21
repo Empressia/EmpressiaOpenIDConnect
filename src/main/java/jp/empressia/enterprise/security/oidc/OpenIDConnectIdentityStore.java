@@ -165,7 +165,7 @@ public class OpenIDConnectIdentityStore implements IOpenIDConnectIdentityStore {
 					issuedAt = id_tokenBody.getIssuedAt().toInstant().toEpochMilli() / 1000;
 					claims = id_tokenBody;
 				}
-				OpenIDConnectCredential newCredential = new OpenIDConnectCredential(
+				OpenIDConnectCredential newCredential = this.Mechanism.createCredential(
 					issuer, subject, id_token, expirationTime, issuedAt,
 					access_token, refresh_token, expires_in, createdAt,
 					(scope != null) ? scope : c.getScope(),

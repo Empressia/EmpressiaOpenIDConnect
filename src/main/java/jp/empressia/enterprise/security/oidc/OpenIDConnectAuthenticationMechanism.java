@@ -535,7 +535,8 @@ public abstract class OpenIDConnectAuthenticationMechanism implements IOpenIDCon
 				String subject = id_tokenBody.getSubject();
 				long expirationTime = id_tokenBody.getExpiration().toInstant().toEpochMilli() / 1000;
 				long issuedAt = id_tokenBody.getIssuedAt().toInstant().toEpochMilli() / 1000;
-				result = this.IdentityStoreHandler.validate(new OpenIDConnectCredential(issuer, subject, id_token, expirationTime, issuedAt, access_token, refresh_token, expires_in, createdAt, (scope != null) ? scope : scopeCookie, id_tokenBody));
+				OpenIDConnectCredential credential = this.createCredential(issuer, subject, id_token, expirationTime, issuedAt, access_token, refresh_token, expires_in, createdAt, (scope != null) ? scope : scopeCookie, id_tokenBody);
+				result = this.IdentityStoreHandler.validate(credential);
 			}
 			if(result.getStatus() == Status.VALID) {
 				// 成功したのでクッキーを削除する。

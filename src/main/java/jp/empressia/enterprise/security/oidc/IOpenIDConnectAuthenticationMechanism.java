@@ -1,5 +1,7 @@
 package jp.empressia.enterprise.security.oidc;
 
+import java.time.LocalDateTime;
+
 import javax.security.enterprise.authentication.mechanism.http.HttpAuthenticationMechanism;
 import javax.security.enterprise.authentication.mechanism.http.HttpMessageContext;
 import javax.servlet.http.Cookie;
@@ -56,6 +58,25 @@ public interface IOpenIDConnectAuthenticationMechanism extends HttpAuthenticatio
 	 * @param credential リフレッシュされた場合に、以前のCredentialが指定されます。
 	 */
 	public void validateAccessToken(String access_token, String token_type, Jws<Claims> id_token, String requestedScope, String requestedNonce, OpenIDConnectCredential credential);
+
+	/**
+	 * このMechanismで扱うOpenIdConnectCredentialを作成します。
+	 * @param Issuer Issuer（iss）。
+	 * @param Subject Subject（sub）。
+	 * @param IDToken。
+	 * @param ExpirationTime ExpirationTime（exp）。
+	 * @param IssuedAt IssuedAt（iat）。
+	 * @param AccessToken。
+	 * @param RefreshToken。
+	 * @param ExpiresIn
+	 * @param CreatedAt
+	 * @param Scope
+	 * @param Claims
+	 */
+	public default OpenIDConnectCredential createCredential(String Issuer, String Subject, String IDToken, long ExpirationTime, long IssuedAt, String AccessToken, String RefreshToken, int ExpiresIn, LocalDateTime CreatedAt, String Scope, Claims Claims) {
+		OpenIDConnectCredential credential = new OpenIDConnectCredential(Issuer, Subject, IDToken, ExpirationTime, IssuedAt, AccessToken, RefreshToken, ExpiresIn, CreatedAt, Scope, Claims);
+		return credential;
+	}
 
 	/**
 	 * トークンをリフレッシュします。
