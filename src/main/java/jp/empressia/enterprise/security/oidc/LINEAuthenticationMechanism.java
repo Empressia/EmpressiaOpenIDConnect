@@ -158,7 +158,8 @@ public class LINEAuthenticationMechanism extends OpenIDConnectAuthenticationMech
 
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.LINE.AuthenticatedURLPath") String AuthenticatedURLPath,
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.IgnoreAuthenticationURLPaths", defaultValue="") String IgnoreAuthenticationURLPaths,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.IgnoreAuthenticationURLPathRegex", defaultValue="") String IgnoreAuthenticationURLPathRegex
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.IgnoreAuthenticationURLPathRegex", defaultValue="") String IgnoreAuthenticationURLPathRegex,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.CreateAuthorizationRequestOnlyWhenProtected", defaultValue="") String CreateAuthorizationRequestOnlyWhenProtected
 		) {
 			super(
 				((Issuer != null) && (Issuer.isEmpty() == false)) ? Issuer : DEFAULT_Issuer,
@@ -171,7 +172,7 @@ public class LINEAuthenticationMechanism extends OpenIDConnectAuthenticationMech
 				UseSecureCookie, TokenCookieMaxAge, scopeCookieName, redirect_uriCookieName, stateCookieName, nonceCookieName, request_pathCookieName, form_postParameterCookiePrefixName,
 				AllowedIssuanceDuration,
 				UseProxy, ProxyHost, ProxyPort, ConnectTimeout, ReadTimeout, UseThreadPool,
-				AuthenticatedURLPath, IgnoreAuthenticationURLPaths, IgnoreAuthenticationURLPathRegex
+				AuthenticatedURLPath, IgnoreAuthenticationURLPaths, IgnoreAuthenticationURLPathRegex, CreateAuthorizationRequestOnlyWhenProtected
 			);
 		}
 

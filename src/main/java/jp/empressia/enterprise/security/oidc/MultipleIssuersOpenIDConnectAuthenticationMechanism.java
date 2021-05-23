@@ -59,7 +59,12 @@ public class MultipleIssuersOpenIDConnectAuthenticationMechanism implements IOpe
 	/** 『/』で始まる、認証をしないURLパスの正規表現です。 */
 	public Pattern getIgnoreAuthenticationURLPathRegex() { return this.IgnoreAuthenticationURLPathRegex; }
 
-	/** コンストラクタ内でしか呼び出されませんが、念のため保持しています。 */
+	/** handleMechanismNotSelectedをHttpMessageContext#isProtectedがtrueの時だけ呼ぶかどうかです。初期値はtrueです。 */
+	private boolean HandleMechanismNotSelectedWhenOnlyProtected;
+	/** handleMechanismNotSelectedをHttpMessageContext#isProtectedがtrueの時だけ呼ぶかどうかです。初期値はtrueです。 */
+	public boolean getHandleMechanismNotSelectedWhenOnlyProtected() { return this.HandleMechanismNotSelectedWhenOnlyProtected; }
+
+		/** コンストラクタ内でしか呼び出されませんが、念のため保持しています。 */
 	private OpenIDConnectAuthenticationMechanismSupplier MechanismSupplier;
 
 	/** 認証（validateRequest）を必要とするリクエストから、どのIssuerに任せるかを選択します。 */
@@ -96,16 +101,16 @@ public class MultipleIssuersOpenIDConnectAuthenticationMechanism implements IOpe
 		return mechanism;
 	}
 
-	/** 認証するIssuerが特定できなかった場合に呼び出されるHandler。 */
-	private IssuerNotSelectedHandler IssuerNotSelectedHandler;
+	/** 認証するMechanismが特定できなかった場合に呼び出されるHandler。 */
+	private MechanismNotSelectedHandler MechanismNotSelectedHandler;
 	/**
-	 * 認証するIssuerが特定できなかった場合に呼び出されます。
-	 * Issuerをユーザーが選択するための、redirect、page、JSONデータとかを提供するためのメソッドです。
+	 * 認証するMechanismが特定できなかった場合に呼び出されます。
+	 * Mechanismをユーザーが選択するための、redirect、page、JSONデータとかを提供するためのメソッドです。
 	 * 基本は、responseに対して、redirectを設定してSEND_CONNTINUEを返してください。
-	 * 初期実装では、コンストラクタで指定されたIssuerNotSelectedHandlerを呼び出します。
+	 * MechanismNotSelectedHandlerを呼び出します。
 	 */
-	protected AuthenticationStatus handleIssuerNotSelected(HttpServletRequest request, HttpServletResponse response, HttpMessageContext httpMessageContext) {
-		return this.IssuerNotSelectedHandler.handle(request, response, httpMessageContext);
+	protected AuthenticationStatus handleMechanismNotSelected(HttpServletRequest request, HttpServletResponse response, HttpMessageContext httpMessageContext) {
+		return this.MechanismNotSelectedHandler.handle(request, response, httpMessageContext);
 	}
 
 	/** Issuerをキーとする移譲先のIOpenIDConnectAuthenticationMechanismです。 */
@@ -131,10 +136,10 @@ public class MultipleIssuersOpenIDConnectAuthenticationMechanism implements IOpe
 	 * 継承して使用する場合は、各引数に対応するメソッドをオーバーライドしていれば、引数をnullにしても平気です。
 	 */
 	@Inject
-	public MultipleIssuersOpenIDConnectAuthenticationMechanism(Settings settings, OpenIDConnectAuthenticationMechanismSupplier MechanismSupplier, OpenIDConnectAuthenticationMechanismSelectable MechanismSelector, IssuerNotSelectedHandler IssuerNotSelectedHandler, IOpenIDConnectIdentityStore IdentityStore) {
+	public MultipleIssuersOpenIDConnectAuthenticationMechanism(Settings settings, OpenIDConnectAuthenticationMechanismSupplier MechanismSupplier, OpenIDConnectAuthenticationMechanismSelectable MechanismSelector, MechanismNotSelectedHandler MechanismNotSelectedHandler, IOpenIDConnectIdentityStore IdentityStore) {
 		this.MechanismSupplier = MechanismSupplier;
 		this.MechanismSelector = MechanismSelector;
-		this.IssuerNotSelectedHandler = IssuerNotSelectedHandler;
+		this.MechanismNotSelectedHandler = MechanismNotSelectedHandler;
 		this.useSecureCookie = settings.useSecureCookie();
 		this.TokenCookieMaxAge = settings.getTokenCookieMaxAge();
 		this.request_pathCookieName = settings.request_pathCookieName();
@@ -159,9 +164,9 @@ public class MultipleIssuersOpenIDConnectAuthenticationMechanism implements IOpe
 		public String select(HttpServletRequest request, HttpServletResponse response, HttpMessageContext httpMessageContext);
 	}
 
-	/** 認証するIssuerが特定できなかった場合に呼び出されるHandlerのインターフェース。 */
+	/** 認証するMechanismが特定できなかった場合に呼び出されるHandlerのインターフェース。 */
 	@FunctionalInterface
-	public static interface IssuerNotSelectedHandler {
+	public static interface MechanismNotSelectedHandler {
 		public AuthenticationStatus handle(HttpServletRequest request, HttpServletResponse response, HttpMessageContext httpMessageContext);
 	}
 
@@ -199,7 +204,11 @@ public class MultipleIssuersOpenIDConnectAuthenticationMechanism implements IOpe
 		if(mechanism != null) {
 			result = mechanism.validateRequest(request, response, httpMessageContext);
 		} else {
-			result = this.handleIssuerNotSelected(request, response, httpMessageContext);
+			if(httpMessageContext.isProtected() || (this.getHandleMechanismNotSelectedWhenOnlyProtected() == false)) {
+				result = this.handleMechanismNotSelected(request, response, httpMessageContext);
+			} else {
+				result = AuthenticationStatus.NOT_DONE;
+			}
 		}
 		return result;
 	}
@@ -318,9 +327,17 @@ public class MultipleIssuersOpenIDConnectAuthenticationMechanism implements IOpe
 		public Pattern getIgnoreAuthenticationURLPathRegex() { return this.IgnoreAuthenticationURLPathRegex; }
 		/** 『/』で始まる、認証をしないURLパスの正規表現です。 */
 		public void setIgnoreAuthenticationURLPathRegex(Pattern IgnoreAuthenticationURLPathRegex) { this.IgnoreAuthenticationURLPathRegex = IgnoreAuthenticationURLPathRegex; }
+		/** handleMechanismNotSelectedをHttpMessageContext#isProtectedがtrueの時だけ呼ぶかどうかです。初期値はtrueです。 */
+		private boolean HandleMechanismNotSelectedWhenOnlyProtected;
+		/** handleMechanismNotSelectedをHttpMessageContext#isProtectedがtrueの時だけ呼ぶかどうかです。初期値はtrueです。 */
+		public boolean getHandleMechanismNotSelectedWhenOnlyProtected() { return this.HandleMechanismNotSelectedWhenOnlyProtected; }
+		/** handleMechanismNotSelectedをHttpMessageContext#isProtectedがtrueの時だけ呼ぶかどうかです。初期値はtrueです。 */
+		public void setHandleMechanismNotSelectedWhenOnlyProtected(boolean HandleMechanismNotSelectedWhenOnlyProtected) { this.HandleMechanismNotSelectedWhenOnlyProtected = HandleMechanismNotSelectedWhenOnlyProtected; }
 
 		/** このライブラリ専用のrequest_pathを保存するクッキーの名前の初期値です。 */
 		public static final String DEFAULT_request_pathCookieName = "pre_request_path";
+		/** handleMechanismNotSelectedをHttpMessageContext#isProtectedがtrueの時だけ呼ぶかどうかの初期値です。 */
+		public static final boolean DEFAULT_handleMechanismNotSelectedWhenOnlyProtected = true;
 
 		/** コンストラクタ。 */
 		@Inject
@@ -329,13 +346,15 @@ public class MultipleIssuersOpenIDConnectAuthenticationMechanism implements IOpe
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.MultipleIssuers.TokenCookieMaxAge", defaultValue="") String TokenCookieMaxAge,
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.MultipleIssuers.request_pathCookieName", defaultValue="") String request_pathCookieName,
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.MultipleIssuers.IgnoreAuthenticationURLPaths", defaultValue="") String IgnoreAuthenticationURLPaths,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.MultipleIssuers.IgnoreAuthenticationURLPathRegex", defaultValue="") String IgnoreAuthenticationURLPathRegex
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.MultipleIssuers.IgnoreAuthenticationURLPathRegex", defaultValue="") String IgnoreAuthenticationURLPathRegex,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.MultipleIssuers.HandleMechanismNotSelectedWhenOnlyProtected", defaultValue="") String HandleMechanismNotSelectedWhenOnlyProtected
 		) {
 			this.UseSecureCookie = ((UseSecureCookie != null) && (UseSecureCookie.isEmpty() == false)) ? Boolean.parseBoolean(UseSecureCookie) : OpenIDConnectAuthenticationMechanism.Settings.DEFAULT_UseSecureCookie;
 			this.TokenCookieMaxAge = ((TokenCookieMaxAge != null) && (TokenCookieMaxAge.isEmpty() == false)) ? Integer.parseInt(TokenCookieMaxAge) : MultipleIssuersOpenIDConnectAuthenticationMechanism.class.getDeclaredAnnotation(RememberMe.class).cookieMaxAgeSeconds();
 			this.request_pathCookieName = ((request_pathCookieName != null) && (request_pathCookieName.isEmpty() == false)) ? request_pathCookieName : Settings.DEFAULT_request_pathCookieName;
 			this.IgnoreAuthenticationURLPaths = ((IgnoreAuthenticationURLPaths != null) && (IgnoreAuthenticationURLPaths.isEmpty() == false)) ? IgnoreAuthenticationURLPaths.split("\\s*,\\s*") : null;
 			this.IgnoreAuthenticationURLPathRegex = ((IgnoreAuthenticationURLPathRegex != null) && (IgnoreAuthenticationURLPathRegex.isEmpty() == false)) ? Pattern.compile(IgnoreAuthenticationURLPathRegex) : null;
+			this.HandleMechanismNotSelectedWhenOnlyProtected = ((HandleMechanismNotSelectedWhenOnlyProtected != null) && (HandleMechanismNotSelectedWhenOnlyProtected.isEmpty() == false)) ? Boolean.parseBoolean(HandleMechanismNotSelectedWhenOnlyProtected) : DEFAULT_handleMechanismNotSelectedWhenOnlyProtected;
 		}
 
 	}
@@ -391,7 +410,7 @@ public class MultipleIssuersOpenIDConnectAuthenticationMechanism implements IOpe
 	 */
 	@Dependent
 	@Alternative
-	public static class RedirectIssuerNotSelectedHandler implements IssuerNotSelectedHandler {
+	public static class RedirectIssuerNotSelectedHandler implements MechanismNotSelectedHandler {
 
 		/** Issuerを選択するためのPageへのパスです。 */
 		private String IssuerSelectionPageURLPath;

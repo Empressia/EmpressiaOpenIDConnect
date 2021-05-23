@@ -199,6 +199,7 @@ public class GoogleAuthenticationMechanism extends OpenIDConnectAuthenticationMe
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.AuthenticatedURLPath") String AuthenticatedURLPath,
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.IgnoreAuthenticationURLPaths", defaultValue="") String IgnoreAuthenticationURLPaths,
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.IgnoreAuthenticationURLPathRegex", defaultValue="") String IgnoreAuthenticationURLPathRegex,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.CreateAuthorizationRequestOnlyWhenProtected", defaultValue="") String CreateAuthorizationRequestOnlyWhenProtected,
 
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.jwks_uri", defaultValue="") String jwks_uri
 		) {
@@ -213,7 +214,7 @@ public class GoogleAuthenticationMechanism extends OpenIDConnectAuthenticationMe
 				UseSecureCookie, TokenCookieMaxAge, scopeCookieName, redirect_uriCookieName, stateCookieName, nonceCookieName, request_pathCookieName, form_postParameterCookiePrefixName,
 				AllowedIssuanceDuration,
 				UseProxy, ProxyHost, ProxyPort, ConnectTimeout, ReadTimeout, UseThreadPool,
-				AuthenticatedURLPath, IgnoreAuthenticationURLPaths, IgnoreAuthenticationURLPathRegex
+				AuthenticatedURLPath, IgnoreAuthenticationURLPaths, IgnoreAuthenticationURLPathRegex, CreateAuthorizationRequestOnlyWhenProtected
 			);
 			this.jwks_uri = ((jwks_uri != null) && (jwks_uri.isEmpty() == false)) ? URI.create(jwks_uri) : DEFAULT_jwks_uri;
 		}

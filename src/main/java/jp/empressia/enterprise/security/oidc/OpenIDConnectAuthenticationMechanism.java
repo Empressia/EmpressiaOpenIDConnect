@@ -198,6 +198,10 @@ public abstract class OpenIDConnectAuthenticationMechanism implements IOpenIDCon
 	private Pattern IgnoreAuthenticationURLPathRegex;
 	/** 『/』で始まる、認証をしないURLパスの正規表現です。 */
 	public Pattern getIgnoreAuthenticationURLPathRegex() { return this.IgnoreAuthenticationURLPathRegex; }
+	/** handleMechanismNotSelectedをHttpMessageContext#isProtectedがtrueの時だけ呼ぶかどうかです。初期値はtrueです。 */
+	private boolean CreateAuthorizationRequestOnlyWhenProtected;
+	/** handleMechanismNotSelectedをHttpMessageContext#isProtectedがtrueの時だけ呼ぶかどうかです。初期値はtrueです。 */
+	public boolean getCreateAuthorizationRequestOnlyWhenProtected() { return this.CreateAuthorizationRequestOnlyWhenProtected; }
 
 	/**
 	 * Authorization Requestを作成して適用します。
@@ -299,6 +303,7 @@ public abstract class OpenIDConnectAuthenticationMechanism implements IOpenIDCon
 			this.AuthenticatedURLPath = settings.getAuthenticatedURLPath();
 			this.IgnoreAuthenticationURLPaths = settings.getIgnoreAuthenticationURLPaths();
 			this.IgnoreAuthenticationURLPathRegex = settings.getIgnoreAuthenticationURLPathRegex();
+			this.CreateAuthorizationRequestOnlyWhenProtected = settings.getCreateAuthorizationRequestOnlyWhenProtected();
 		}
 		{
 			this.IdentityStoreHandler = IdentityStoreHandler;
@@ -566,8 +571,14 @@ public abstract class OpenIDConnectAuthenticationMechanism implements IOpenIDCon
 				}
 			}
 		}
-		this.handleAuthorizationRequest(request, response, httpMessageContext);
-		return AuthenticationStatus.SEND_CONTINUE;
+		AuthenticationStatus result;
+		if(httpMessageContext.isProtected() || (this.getCreateAuthorizationRequestOnlyWhenProtected() == false)) {
+			this.handleAuthorizationRequest(request, response, httpMessageContext);
+			result = AuthenticationStatus.SEND_CONTINUE;
+		} else {
+			result = AuthenticationStatus.NOT_DONE;
+		}
+		return result;
 	}
 
 	/**
@@ -1281,6 +1292,12 @@ public abstract class OpenIDConnectAuthenticationMechanism implements IOpenIDCon
 		public Pattern getIgnoreAuthenticationURLPathRegex() { return this.IgnoreAuthenticationURLPathRegex; }
 		/** 『/』で始まる、認証をしないURLパスの正規表現です。 */
 		public void setIgnoreAuthenticationURLPathRegex(Pattern IgnoreAuthenticationURLPathRegex) { this.IgnoreAuthenticationURLPathRegex = IgnoreAuthenticationURLPathRegex; }
+		/** handleMechanismNotSelectedをHttpMessageContext#isProtectedがtrueの時だけ呼ぶかどうかです。初期値はtrueです。 */
+		private boolean CreateAuthorizationRequestOnlyWhenProtected;
+		/** handleMechanismNotSelectedをHttpMessageContext#isProtectedがtrueの時だけ呼ぶかどうかです。初期値はtrueです。 */
+		public boolean getCreateAuthorizationRequestOnlyWhenProtected() { return this.CreateAuthorizationRequestOnlyWhenProtected; }
+		/** handleMechanismNotSelectedをHttpMessageContext#isProtectedがtrueの時だけ呼ぶかどうかです。初期値はtrueです。 */
+		public void setCreateAuthorizationRequestOnlyWhenProtected(boolean CreateAuthorizationRequestOnlyWhenProtected) { this.CreateAuthorizationRequestOnlyWhenProtected = CreateAuthorizationRequestOnlyWhenProtected; }
 
 		public static final String DEFAULT_response_type = "code";
 		public static final String DEFAULT_response_mode = "query";
@@ -1299,6 +1316,7 @@ public abstract class OpenIDConnectAuthenticationMechanism implements IOpenIDCon
 		public static final int DEFAULT_ConnectTimeout = 3;
 		public static final int DEFAULT_ReadTimeout = 5;
 		public static final boolean DEFAULT_UseThreadPool = true;
+		public static final boolean DEFAULT_CreateAuthorizationRequestOnlyWhenProtected = true;
 
 		/** コンストラクタ。 */
 		@Inject
@@ -1337,7 +1355,8 @@ public abstract class OpenIDConnectAuthenticationMechanism implements IOpenIDCon
 
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.AuthenticatedURLPath") String AuthenticatedURLPath,
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.IgnoreAuthenticationURLPaths", defaultValue="") String IgnoreAuthenticationURLPaths,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.IgnoreAuthenticationURLPathRegex", defaultValue="") String IgnoreAuthenticationURLPathRegex
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.IgnoreAuthenticationURLPathRegex", defaultValue="") String IgnoreAuthenticationURLPathRegex,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.CreateAuthorizationRequestOnlyWhenProtected", defaultValue="") String CreateAuthorizationRequestOnlyWhenProtected
 		) {
 			this.Issuer = ((Issuer != null) && (Issuer.isEmpty() == false)) ? Issuer : null;
 			this.AuthorizationEndpoint = ((AuthorizationEndpoint != null) && (AuthorizationEndpoint.isEmpty() == false)) ? AuthorizationEndpoint : null;
@@ -1367,6 +1386,7 @@ public abstract class OpenIDConnectAuthenticationMechanism implements IOpenIDCon
 			this.AuthenticatedURLPath = ((AuthenticatedURLPath != null) && (AuthenticatedURLPath.isEmpty() == false)) ? AuthenticatedURLPath : null;
 			this.IgnoreAuthenticationURLPaths = ((IgnoreAuthenticationURLPaths != null) && (IgnoreAuthenticationURLPaths.isEmpty() == false)) ? IgnoreAuthenticationURLPaths.split("\\s*,\\s*") : null;
 			this.IgnoreAuthenticationURLPathRegex = ((IgnoreAuthenticationURLPathRegex != null) && (IgnoreAuthenticationURLPathRegex.isEmpty() == false)) ? Pattern.compile(IgnoreAuthenticationURLPathRegex) : null;
+			this.CreateAuthorizationRequestOnlyWhenProtected = ((CreateAuthorizationRequestOnlyWhenProtected != null) && (CreateAuthorizationRequestOnlyWhenProtected.isEmpty() == false)) ? Boolean.parseBoolean(CreateAuthorizationRequestOnlyWhenProtected) : DEFAULT_CreateAuthorizationRequestOnlyWhenProtected;
 		}
 
 	}

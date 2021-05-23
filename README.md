@@ -228,14 +228,20 @@ public class TestWebAPI {
 
 ### 認証しないパスを設定します。
 
-必要に応じて、認証しないパスを設定します。  
+RolesAllowedアノテーションなどを使う場合は、  
+HttpMessageContext#isProtectedが自動でtrueになるため、  
+通常は、必要なときだけ認証されると思います。  
 
-Mechanism用のSettingsにプロパティが用意されています。  
+しかし、常に認証したい場合は、設定で切り替えられます。  
+また、必要に応じて、認証しないパスも設定できます。  
 
-例えば、Microsoft用のMechanismを使用して、assets以下のURLを認証が必要ない場合、以下のように設定します。  
+いずれも、Mechanism用のSettingsにプロパティが用意されています。  
+
+例えば、assets以下のURLでは認証をせず、それ以外では常に認証を行う場合、以下のように設定します。  
 
 ```
-jp.empressia.enterprise.security.oidc.Microsoft.IgnoreAuthenticationURLPathRegex=^/assets/.*$
+jp.empressia.enterprise.security.oidc.IgnoreAuthenticationURLPathRegex=^/assets/.*$
+jp.empressia.enterprise.security.oidc.CreateAuthorizationRequestOnlyWhenProtected=false
 ```
 
 ## 複数の実装クラスを同時に扱う方法
@@ -254,7 +260,7 @@ MultipleIssuersAuthenticationMechanismを継承してCDIに登録します。
 |-|-|-|
 |1|OpenIDConnectAuthenticationMechanismSupplier|サポートしたいOpenIDConnectAuthenticationMechanismの一覧を定義します。|
 |2|OpenIDConnectAuthenticationMechanismSelectable|リクエストに対してどのOpenIDConnectAuthenticationMechanismを選択するかを定義します。リクエストパラメーターから選択するRedirectedIssurSelectorが用意されています。|
-|3|IssuerNotSelectedHandler|いずれのOpenIDConnectAuthenticationMechanismも選択されなかった場合の動作を定義します。選択するページへリダイレクトするRedirectIssuerNotSelectedHandlerが用意されています。|
+|3|MechanismNotSelectedHandler|いずれのOpenIDConnectAuthenticationMechanismも選択されなかった場合の動作を定義します。選択するページへリダイレクトするRedirectIssuerNotSelectedHandlerが用意されています。|
 
 例えば、以下のように実装します。  
 移譲先となるMechanismはCDIに登録すると、CDIでの解決ができなくなる点に注意してください。  
@@ -313,8 +319,8 @@ public class ApplicationAuthenticationMechanism extends MultipleIssuersOpenIDCon
 	 * コンストラクタ。
 	 */
 	@Inject
-	public ApplicationAuthenticationMechanism(Settings settings, OpenIDConnectAuthenticationMechanismSupplier MechanismSupplier, OpenIDConnectAuthenticationMechanismSelectable MechanismSelector, IssuerNotSelectedHandler IssuerNotSelectedHandler, IOpenIDConnectIdentityStore IdentityStore) {
-		super(settings, MechanismSupplier, MechanismSelector, IssuerNotSelectedHandler, IdentityStore);
+	public ApplicationAuthenticationMechanism(Settings settings, OpenIDConnectAuthenticationMechanismSupplier MechanismSupplier, OpenIDConnectAuthenticationMechanismSelectable MechanismSelector, MechanismNotSelectedHandler MechanismNotSelectedHandler, IOpenIDConnectIdentityStore IdentityStore) {
+		super(settings, MechanismSupplier, MechanismSelector, MechanismNotSelectedHandler, IdentityStore);
 	}
 
 }
@@ -458,6 +464,13 @@ UnsupportedExceptionが投げられる場合があります。
 	* removeRequestPath
 * IOpenIDConnectIdentityStore
 	* findCredential
+
+## プロジェクトビルドの注意事項
+
+Visual Studio Codeでテストする場合は、  
+java.test.configのvmArgsにJMockitのJavaagentを設定する必要があります。  
+Gradleに設定してあるcopySyncTestJavaAgentタスクを実行することで、  
+build/TestAgentJava/に、ライブラリがコピーされるようになっています。  
 
 ## ライセンス
 

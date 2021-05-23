@@ -350,6 +350,7 @@ public class MicrosoftAuthenticationMechanism extends OpenIDConnectAuthenticatio
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.AuthenticatedURLPath") String AuthenticatedURLPath,
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.IgnoreAuthenticationURLPaths", defaultValue="") String IgnoreAuthenticationURLPaths,
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.IgnoreAuthenticationURLPathRegex", defaultValue="") String IgnoreAuthenticationURLPathRegex,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.CreateAuthorizationRequestOnlyWhenProtected", defaultValue="") String CreateAuthorizationRequestOnlyWhenProtected,
 
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.jwks_uri", defaultValue="") String jwks_uri
 		) {
@@ -365,7 +366,7 @@ public class MicrosoftAuthenticationMechanism extends OpenIDConnectAuthenticatio
 				UseSecureCookie, TokenCookieMaxAge, scopeCookieName, redirect_uriCookieName, stateCookieName, nonceCookieName, request_pathCookieName, form_postParameterCookiePrefixName,
 				AllowedIssuanceDuration,
 				UseProxy, ProxyHost, ProxyPort, ConnectTimeout, ReadTimeout, UseThreadPool,
-				AuthenticatedURLPath, IgnoreAuthenticationURLPaths, IgnoreAuthenticationURLPathRegex
+				AuthenticatedURLPath, IgnoreAuthenticationURLPaths, IgnoreAuthenticationURLPathRegex, CreateAuthorizationRequestOnlyWhenProtected
 			);
 			this.jwks_uri = ((jwks_uri != null) && (jwks_uri.isEmpty() == false)) ? URI.create(jwks_uri) : URI.create(DEFAULT_jwks_uri);
 		}
