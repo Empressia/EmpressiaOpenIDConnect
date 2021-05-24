@@ -81,7 +81,7 @@ public class MultipleIssuersOpenIDConnectAuthenticationMechanism implements IOpe
 		IOpenIDConnectAuthenticationMechanism mechanism = null;
 		if(mechanism == null) {
 			String requestURI = request.getRequestURI();
-			var entry = this.Mechanisms.entrySet().stream().filter(m -> requestURI.equals(m.getValue().getAuthenticatedURLPath())).findFirst().orElse(null);
+			var entry = this.getMechanisms().entrySet().stream().filter(m -> requestURI.equals(m.getValue().getAuthenticatedURLPath())).findFirst().orElse(null);
 			mechanism = (entry != null) ? entry.getValue() : null;
 		}
 		if(mechanism == null) {
