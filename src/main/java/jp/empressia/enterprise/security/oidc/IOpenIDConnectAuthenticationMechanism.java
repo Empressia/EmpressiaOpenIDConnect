@@ -183,9 +183,7 @@ public interface IOpenIDConnectAuthenticationMechanism extends HttpAuthenticatio
 	 */
 	@Override
 	public default void removeRequestPath(HttpServletRequest request, HttpServletResponse response, HttpMessageContext httpMessageContext) {
-		Cookie request_pathCookie = IOpenIDConnectAuthenticationMechanism.extractCookie(this.request_pathCookieName(), request);
-		if(request_pathCookie == null) { return; }
-		Cookie removeCookie = IOpenIDConnectAuthenticationMechanism.createCookie(this.request_pathCookieName(), request_pathCookie.getValue(), request_pathCookie.getPath(), this.useSecureCookie());
+		Cookie removeCookie = IOpenIDConnectAuthenticationMechanism.createCookie(this.request_pathCookieName(), "", this.getAuthenticatedURLPath(), this.useSecureCookie());
 		removeCookie.setMaxAge(0);
 		response.addCookie(removeCookie);
 	}

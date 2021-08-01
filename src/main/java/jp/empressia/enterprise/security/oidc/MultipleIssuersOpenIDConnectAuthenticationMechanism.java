@@ -458,6 +458,13 @@ public class MultipleIssuersOpenIDConnectAuthenticationMechanism implements IOpe
 			String request_path = URLPath;
 			Cookie request_pathCookie = IOpenIDConnectAuthenticationMechanism.createCookie(this.request_pathCookieName(), request_path, null, this.useSecureCookie());
 			response.addCookie(request_pathCookie);
+			// 各Mechanismで別のタイミングで設定されていたrequest_pathがあれば、リセットされるようにする。
+			// ただし、そのMechanismからダイレクトに転送されてきているなら（そういうことはないと思うけど）、そっちで設定されているのが期待するものだと考えてリセットしない。
+			for(IOpenIDConnectAuthenticationMechanism m : this.getMechanisms().values()) {
+				String cookiePath = m.getAuthenticatedURLPath();
+				if(cookiePath.equals(request_path)) { continue; }
+				m.removeRequestPath(request, response, httpMessageContext);
+			}
 		}
 	}
 
