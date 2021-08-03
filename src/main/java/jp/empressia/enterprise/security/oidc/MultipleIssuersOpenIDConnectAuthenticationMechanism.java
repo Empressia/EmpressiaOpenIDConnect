@@ -491,9 +491,8 @@ public class MultipleIssuersOpenIDConnectAuthenticationMechanism implements IOpe
 	 */
 	@Override
 	public void removeRequestPath(HttpServletRequest request, HttpServletResponse response, HttpMessageContext httpMessageContext) {
-		IOpenIDConnectAuthenticationMechanism mechanism = this.selectMechanism(request, response, httpMessageContext);
-		if(mechanism != null) {
-			mechanism.removeRequestPath(request, response, httpMessageContext);
+		for(IOpenIDConnectAuthenticationMechanism m : this.getMechanisms().values()) {
+			m.removeRequestPath(request, response, httpMessageContext);
 		}
 		IOpenIDConnectAuthenticationMechanism.super.removeRequestPath(request, response, httpMessageContext);
 	}
