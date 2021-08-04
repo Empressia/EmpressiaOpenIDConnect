@@ -7,6 +7,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 import javax.annotation.PostConstruct;
@@ -26,7 +27,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.io.JacksonDeserializer;
+import io.jsonwebtoken.jackson.io.JacksonDeserializer;
 
 /**
  * Google OpenID Connect用のMechanismです。
@@ -90,8 +91,10 @@ public class GoogleAuthenticationMechanism extends OpenIDConnectAuthenticationMe
 		}
 		Jws<Claims> jws;
 		{
-			JwtParser parser = Jwts.parser().deserializeJsonWith(new JacksonDeserializer<Map<String, ?>>(this.ObjectMapper));
-			parser = parser.setSigningKey(key);
+			JwtParser parser = Jwts.parserBuilder()
+				.deserializeJsonWith(new JacksonDeserializer<Map<String, ?>>(this.ObjectMapper))
+				.setSigningKey(key)
+				.build();
 			jws = parser.parseClaimsJws(id_token);
 		}
 		return jws;
@@ -164,44 +167,101 @@ public class GoogleAuthenticationMechanism extends OpenIDConnectAuthenticationMe
 		/** コンストラクタ。 */
 		@Inject
 		public Settings(
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.Issuer", defaultValue="") String Issuer,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.AuthorizationEndpoint", defaultValue="") String AuthorizationEndpoint,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.TokenEndpoint", defaultValue="") String TokenEndpoint,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.RevocationEndpoint", defaultValue="") String RevocationEndpoint,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.Issuer", defaultValue="") Optional<String> Issuer,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.AuthorizationEndpoint", defaultValue="") Optional<String> AuthorizationEndpoint,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.TokenEndpoint", defaultValue="") Optional<String> TokenEndpoint,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.RevocationEndpoint", defaultValue="") Optional<String> RevocationEndpoint,
 
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.response_type", defaultValue="") String response_type,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.response_mode", defaultValue="") String response_mode,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.response_type", defaultValue="") Optional<String> response_type,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.response_mode", defaultValue="") Optional<String> response_mode,
 
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.scope", defaultValue="") String scope,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.scope", defaultValue="") Optional<String> scope,
 
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.client_id") String client_id,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.ClientAuthenticaitonMethod", defaultValue="") String ClientAuthenticaitonMethod,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.ClientAuthenticaitonMethod", defaultValue="") Optional<String> ClientAuthenticaitonMethod,
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.client_secret") String client_secret,
 
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.UseSecureCookie", defaultValue="") String UseSecureCookie,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.TokenCookieMaxAge", defaultValue="") String TokenCookieMaxAge,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.scopeCookieName", defaultValue="") String scopeCookieName,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.redirect_uriCookieName", defaultValue="") String redirect_uriCookieName,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.stateCookieName", defaultValue="") String stateCookieName,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.nonceCookieName", defaultValue="") String nonceCookieName,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.request_pathCookieName", defaultValue="") String request_pathCookieName,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.form_postParameterCookiePrefixName", defaultValue="") String form_postParameterCookiePrefixName,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.UseSecureCookie", defaultValue="") Optional<String> UseSecureCookie,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.TokenCookieMaxAge", defaultValue="") Optional<String> TokenCookieMaxAge,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.scopeCookieName", defaultValue="") Optional<String> scopeCookieName,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.redirect_uriCookieName", defaultValue="") Optional<String> redirect_uriCookieName,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.stateCookieName", defaultValue="") Optional<String> stateCookieName,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.nonceCookieName", defaultValue="") Optional<String> nonceCookieName,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.request_pathCookieName", defaultValue="") Optional<String> request_pathCookieName,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.form_postParameterCookiePrefixName", defaultValue="") Optional<String> form_postParameterCookiePrefixName,
 
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.AllowedIssuanceDuration", defaultValue="") String AllowedIssuanceDuration,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.AllowedIssuanceDuration", defaultValue="") Optional<String> AllowedIssuanceDuration,
 
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.UseProxy", defaultValue="") String UseProxy,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.ProxyHost", defaultValue="") String ProxyHost,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.ProxyPort", defaultValue="") String ProxyPort,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.ConnectTimeout", defaultValue="") String ConnectTimeout,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.ReadTimeout", defaultValue="") String ReadTimeout,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.UseThreadPool", defaultValue="") String UseThreadPool,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.UseProxy", defaultValue="") Optional<String> UseProxy,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.ProxyHost", defaultValue="") Optional<String> ProxyHost,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.ProxyPort", defaultValue="") Optional<String> ProxyPort,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.ConnectTimeout", defaultValue="") Optional<String> ConnectTimeout,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.ReadTimeout", defaultValue="") Optional<String> ReadTimeout,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.UseThreadPool", defaultValue="") Optional<String> UseThreadPool,
 
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.AuthenticatedURLPath") String AuthenticatedURLPath,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.IgnoreAuthenticationURLPaths", defaultValue="") String IgnoreAuthenticationURLPaths,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.IgnoreAuthenticationURLPathRegex", defaultValue="") String IgnoreAuthenticationURLPathRegex,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.CreateAuthorizationRequestOnlyWhenProtected", defaultValue="") String CreateAuthorizationRequestOnlyWhenProtected,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.IgnoreAuthenticationURLPaths", defaultValue="") Optional<String> IgnoreAuthenticationURLPaths,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.IgnoreAuthenticationURLPathRegex", defaultValue="") Optional<String> IgnoreAuthenticationURLPathRegex,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.CreateAuthorizationRequestOnlyWhenProtected", defaultValue="") Optional<String> CreateAuthorizationRequestOnlyWhenProtected,
 
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.jwks_uri", defaultValue="") String jwks_uri
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Google.jwks_uri", defaultValue="") Optional<String> jwks_uri
+		) {
+			this(
+				((Issuer != null) && (Issuer.isEmpty() == false)) ? Issuer.get() : null,
+				((AuthorizationEndpoint != null) && (AuthorizationEndpoint.isEmpty() == false)) ? AuthorizationEndpoint.get() : null,
+				((TokenEndpoint != null) && (TokenEndpoint.isEmpty() == false)) ?  TokenEndpoint.get() : null,
+				((RevocationEndpoint != null) && (RevocationEndpoint.isEmpty() == false)) ? RevocationEndpoint.get() : null,
+				response_type.get(), response_mode.get(),
+				scope.get(),
+				client_id, ClientAuthenticaitonMethod.get(), client_secret,
+				UseSecureCookie.get(), TokenCookieMaxAge.get(), scopeCookieName.get(), redirect_uriCookieName.get(), stateCookieName.get(), nonceCookieName.get(), request_pathCookieName.get(), form_postParameterCookiePrefixName.get(),
+				AllowedIssuanceDuration.get(),
+				UseProxy.get(), ProxyHost.get(), ProxyPort.get(), ConnectTimeout.get(), ReadTimeout.get(), UseThreadPool.get(),
+				AuthenticatedURLPath, IgnoreAuthenticationURLPaths.get(), IgnoreAuthenticationURLPathRegex.get(), CreateAuthorizationRequestOnlyWhenProtected.get(),
+				((jwks_uri != null) && (jwks_uri.isEmpty() == false)) ? jwks_uri.get() : null
+			);
+		}
+
+		/** コンストラクタ。 */
+		public Settings(
+			String Issuer,
+			String AuthorizationEndpoint,
+			String TokenEndpoint,
+			String RevocationEndpoint,
+
+			String response_type,
+			String response_mode,
+
+			String scope,
+
+			String client_id,
+			String ClientAuthenticaitonMethod,
+			String client_secret,
+
+			String UseSecureCookie,
+			String TokenCookieMaxAge,
+			String scopeCookieName,
+			String redirect_uriCookieName,
+			String stateCookieName,
+			String nonceCookieName,
+			String request_pathCookieName,
+			String form_postParameterCookiePrefixName,
+
+			String AllowedIssuanceDuration,
+
+			String UseProxy,
+			String ProxyHost,
+			String ProxyPort,
+			String ConnectTimeout,
+			String ReadTimeout,
+			String UseThreadPool,
+
+			String AuthenticatedURLPath,
+			String IgnoreAuthenticationURLPaths,
+			String IgnoreAuthenticationURLPathRegex,
+			String CreateAuthorizationRequestOnlyWhenProtected,
+
+			String jwks_uri
 		) {
 			super(
 				((Issuer != null) && (Issuer.isEmpty() == false)) ? Issuer : DEFAULT_Issuer,

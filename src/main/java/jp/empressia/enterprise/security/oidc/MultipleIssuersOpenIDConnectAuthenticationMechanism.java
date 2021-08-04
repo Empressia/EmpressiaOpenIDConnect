@@ -2,6 +2,7 @@ package jp.empressia.enterprise.security.oidc;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -342,12 +343,31 @@ public class MultipleIssuersOpenIDConnectAuthenticationMechanism implements IOpe
 		/** コンストラクタ。 */
 		@Inject
 		public Settings(
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.MultipleIssuers.UseSecureCookie", defaultValue="") String UseSecureCookie,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.MultipleIssuers.TokenCookieMaxAge", defaultValue="") String TokenCookieMaxAge,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.MultipleIssuers.request_pathCookieName", defaultValue="") String request_pathCookieName,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.MultipleIssuers.IgnoreAuthenticationURLPaths", defaultValue="") String IgnoreAuthenticationURLPaths,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.MultipleIssuers.IgnoreAuthenticationURLPathRegex", defaultValue="") String IgnoreAuthenticationURLPathRegex,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.MultipleIssuers.HandleMechanismNotSelectedWhenOnlyProtected", defaultValue="") String HandleMechanismNotSelectedWhenOnlyProtected
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.MultipleIssuers.UseSecureCookie", defaultValue="") Optional<String> UseSecureCookie,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.MultipleIssuers.TokenCookieMaxAge", defaultValue="") Optional<String> TokenCookieMaxAge,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.MultipleIssuers.request_pathCookieName", defaultValue="") Optional<String> request_pathCookieName,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.MultipleIssuers.IgnoreAuthenticationURLPaths", defaultValue="") Optional<String> IgnoreAuthenticationURLPaths,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.MultipleIssuers.IgnoreAuthenticationURLPathRegex", defaultValue="") Optional<String> IgnoreAuthenticationURLPathRegex,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.MultipleIssuers.HandleMechanismNotSelectedWhenOnlyProtected", defaultValue="") Optional<String> HandleMechanismNotSelectedWhenOnlyProtected
+		) {
+			this(
+				((UseSecureCookie != null) && (UseSecureCookie.isEmpty() == false)) ? UseSecureCookie.get() : null,
+				((TokenCookieMaxAge != null) && (TokenCookieMaxAge.isEmpty() == false)) ? TokenCookieMaxAge.get() : null,
+				((request_pathCookieName != null) && (request_pathCookieName.isEmpty() == false)) ? request_pathCookieName.get() : null,
+				((IgnoreAuthenticationURLPaths != null) && (IgnoreAuthenticationURLPaths.isEmpty() == false)) ? IgnoreAuthenticationURLPaths.get() : null,
+				((IgnoreAuthenticationURLPathRegex != null) && (IgnoreAuthenticationURLPathRegex.isEmpty() == false)) ? IgnoreAuthenticationURLPathRegex.get() : null,
+				((HandleMechanismNotSelectedWhenOnlyProtected != null) && (HandleMechanismNotSelectedWhenOnlyProtected.isEmpty() == false)) ? HandleMechanismNotSelectedWhenOnlyProtected.get() : null
+			);
+		}
+
+		/** コンストラクタ。 */
+		public Settings(
+			String UseSecureCookie,
+			String TokenCookieMaxAge,
+			String request_pathCookieName,
+			String IgnoreAuthenticationURLPaths,
+			String IgnoreAuthenticationURLPathRegex,
+			String HandleMechanismNotSelectedWhenOnlyProtected
 		) {
 			this.UseSecureCookie = ((UseSecureCookie != null) && (UseSecureCookie.isEmpty() == false)) ? Boolean.parseBoolean(UseSecureCookie) : OpenIDConnectAuthenticationMechanism.Settings.DEFAULT_UseSecureCookie;
 			this.TokenCookieMaxAge = ((TokenCookieMaxAge != null) && (TokenCookieMaxAge.isEmpty() == false)) ? Integer.parseInt(TokenCookieMaxAge) : MultipleIssuersOpenIDConnectAuthenticationMechanism.class.getDeclaredAnnotation(RememberMe.class).cookieMaxAgeSeconds();
@@ -382,8 +402,19 @@ public class MultipleIssuersOpenIDConnectAuthenticationMechanism implements IOpe
 		/** コンストラクタ。 */
 		@Inject
 		public RedirectedIssurSelector(
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.MultipleIssuers.RedirectedIssurSelector.IssuerParameterName", defaultValue="") String IssuerParameterName,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.MultipleIssuers.RedirectedIssurSelector.IssuerParameterName", defaultValue="") Optional<String> IssuerParameterName,
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.MultipleIssuers.RedirectedIssurSelector.IssuerSelectedURLPath") String IssuerSelectedURLPath
+		) {
+			this(
+				((IssuerParameterName != null) && (IssuerParameterName.isEmpty() == false)) ? IssuerParameterName.get() : null,
+				IssuerSelectedURLPath
+			);
+		}
+
+		/** コンストラクタ。 */
+		public RedirectedIssurSelector(
+			String IssuerParameterName,
+			String IssuerSelectedURLPath
 		) {
 			this.IssuerParameterName = ((IssuerParameterName != null) && (IssuerParameterName.isEmpty() == false)) ? IssuerParameterName : DEFAULT_IssuerParameterName;
 			this.IssuerSelectedURLPath = IssuerSelectedURLPath;

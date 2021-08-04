@@ -15,7 +15,7 @@
 
 ## 概要
 
-Java EE Security API（Jakarta Security）用の、  
+Jakarta Security用の、  
 OpenID Connectプロトコルを使用した認証をサポートするためのライブラリです。  
 
 ## 使い方
@@ -37,7 +37,7 @@ Gradleであれば、例えば以下のように設定します。
 
 ```groovy
 	// use Empressia OpenID Connect.
-	implementation(group:"jp.empressia", name:"jp.empressia.enterprise.security.oidc", version:"1.0.3");
+	implementation(group:"jp.empressia", name:"jp.empressia.enterprise.security.oidc", version:"1.2.0");
 ```
 
 使う場合は、関連したライブラリの依存関係も必要になると思います。
@@ -45,22 +45,22 @@ Gradleであれば、例えば以下のように設定します。
 
 ```groovy
 	// use CDI.
-	providedCompile(group:"javax.enterprise", name:"cdi-api", version:"2.0.SP1");
+	providedCompile(group:"jakarta.enterprise", name:"jakarta.enterprise.cdi-api", version:"2.0.2");
 	// use Java EE Security API.
-	providedCompile(group:"javax.security.enterprise", name: "javax.security.enterprise-api", version:"1.0");
+	providedCompile(group:"jakarta.security.enterprise", name: "jakarta.security.enterprise-api", version:"1.0.2");
 	// use HttpServletRequest, HttpServletResponse.
-	// providedCompile(group:"javax.servlet", name: "javax.servlet-api", version:"4.0.1");
+	// providedCompile(group:"jakarta.servlet", name: "jakarta.servlet-api", version:"4.0.2");
 	// use for security interceptor priority.
-	// providedCompile(group:"javax.annotation", name:"javax.annotation-api", version:"1.3.2");
+	// providedCompile(group:"jakarta.annotation", name:"jakarta.annotation-api", version:"1.3.5");
 	// use MicroProfile Config API.
-	// providedCompile(group:"org.eclipse.microprofile.config", name:"microprofile-config-api", version:"1.3");
+	// providedCompile(group:"org.eclipse.microprofile.config", name:"microprofile-config-api", version:"2.0");
 	// use JCache for security token cache (not in Jave EE 8).
 	// providedCompile(group:"javax.cache", name:"cache-api", version:"1.1.1");
 	// use for JWT.
-	// providedRuntime(group:"io.jsonwebtoken", name:"jjwt-impl", version:"0.10.7");
-	// providedCompile(group:"io.jsonwebtoken", name:"jjwt-jackson", version:"0.10.7");
+	// providedRuntime(group:"io.jsonwebtoken", name:"jjwt-impl", version:"0.11.2");
+	// providedCompile(group:"io.jsonwebtoken", name:"jjwt-jackson", version:"0.11.2");
 	//  or
-	// implementation(group:"io.jsonwebtoken", name:"jjwt-jackson", version:"0.10.7");
+	// implementation(group:"io.jsonwebtoken", name:"jjwt-jackson", version:"0.11.2");
 ```
 
 コメントアウトしてる部分は、依存関係の宣言が必ず必要というわけではないかと思います。  
@@ -412,6 +412,7 @@ MicroProfile Config
 * form_postされた場合は、Cookieにフォーム内容を設定して自身にredirectすることで値を取得しようとします。
 * Client Authentication Methodは、client_secret_postにだけ対応しています。
 	他の方法は、OpenIDConnectAuthenticationMechanismのメソッドを継承して自分で実装する必要があります。  
+* Version 1.2.0で、MicroProfile Config 2.0の仕様にあわせてあります。
 
 ### Payara Microでの制限
 

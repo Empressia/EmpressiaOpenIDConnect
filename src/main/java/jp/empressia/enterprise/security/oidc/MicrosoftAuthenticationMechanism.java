@@ -7,6 +7,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 import javax.annotation.PostConstruct;
@@ -27,7 +28,7 @@ import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.io.JacksonDeserializer;
+import io.jsonwebtoken.jackson.io.JacksonDeserializer;
 
 /**
  * Microsoft identity platform OpenID Connect用のMechanismです。
@@ -103,8 +104,10 @@ public class MicrosoftAuthenticationMechanism extends OpenIDConnectAuthenticatio
 		}
 		Jws<Claims> jws;
 		{
-			JwtParser parser = Jwts.parser().deserializeJsonWith(new JacksonDeserializer<Map<String, ?>>(this.ObjectMapper));
-			parser = parser.setSigningKey(key);
+			JwtParser parser = Jwts.parserBuilder()
+				.deserializeJsonWith(new JacksonDeserializer<Map<String, ?>>(this.ObjectMapper))
+				.setSigningKey(key)
+				.build();
 			jws = parser.parseClaimsJws(id_token);
 		}
 		return jws;
@@ -159,8 +162,10 @@ public class MicrosoftAuthenticationMechanism extends OpenIDConnectAuthenticatio
 				throw new IllegalStateException("access_tokenの署名の確認に必要な鍵の取得に失敗しました。", ex);
 			}
 		}
-		JwtParser parser = Jwts.parser().deserializeJsonWith(new JacksonDeserializer<Map<String, ?>>(this.ObjectMapper));
-		parser = parser.setSigningKey(key);
+		JwtParser parser = Jwts.parserBuilder()
+			.deserializeJsonWith(new JacksonDeserializer<Map<String, ?>>(this.ObjectMapper))
+			.setSigningKey(key)
+			.build();
 		Jws<Claims> jws = parser.parseClaimsJws(access_token);
 		JwsHeader<?> header = jws.getHeader();
 		{
@@ -315,44 +320,102 @@ public class MicrosoftAuthenticationMechanism extends OpenIDConnectAuthenticatio
 		/** コンストラクタ。 */
 		@Inject
 		public Settings(
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.Issuer", defaultValue="") String Issuer,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.AuthorizationEndpoint", defaultValue="") String AuthorizationEndpoint,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.TokenEndpoint", defaultValue="") String TokenEndpoint,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.RevocationEndpoint", defaultValue="") String RevocationEndpoint,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.Issuer", defaultValue="") Optional<String> Issuer,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.AuthorizationEndpoint", defaultValue="") Optional<String> AuthorizationEndpoint,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.TokenEndpoint", defaultValue="") Optional<String> TokenEndpoint,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.RevocationEndpoint", defaultValue="") Optional<String> RevocationEndpoint,
 
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.response_type", defaultValue="") String response_type,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.response_mode", defaultValue="") String response_mode,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.response_type", defaultValue="") Optional<String> response_type,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.response_mode", defaultValue="") Optional<String> response_mode,
 
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.scope", defaultValue="") String scope,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.scope", defaultValue="") Optional<String> scope,
 
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.client_id") String client_id,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.ClientAuthenticaitonMethod", defaultValue="") String ClientAuthenticaitonMethod,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.client_secret", defaultValue="") String client_secret,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.ClientAuthenticaitonMethod", defaultValue="") Optional<String> ClientAuthenticaitonMethod,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.client_secret", defaultValue="") Optional<String> client_secret,
 
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.UseSecureCookie", defaultValue="") String UseSecureCookie,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.TokenCookieMaxAge", defaultValue="") String TokenCookieMaxAge,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.scopeCookieName", defaultValue="") String scopeCookieName,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.redirect_uriCookieName", defaultValue="") String redirect_uriCookieName,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.stateCookieName", defaultValue="") String stateCookieName,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.nonceCookieName", defaultValue="") String nonceCookieName,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.request_pathCookieName", defaultValue="") String request_pathCookieName,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.form_postParameterCookiePrefixName", defaultValue="") String form_postParameterCookiePrefixName,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.UseSecureCookie", defaultValue="") Optional<String> UseSecureCookie,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.TokenCookieMaxAge", defaultValue="") Optional<String> TokenCookieMaxAge,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.scopeCookieName", defaultValue="") Optional<String> scopeCookieName,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.redirect_uriCookieName", defaultValue="") Optional<String> redirect_uriCookieName,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.stateCookieName", defaultValue="") Optional<String> stateCookieName,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.nonceCookieName", defaultValue="") Optional<String> nonceCookieName,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.request_pathCookieName", defaultValue="") Optional<String> request_pathCookieName,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.form_postParameterCookiePrefixName", defaultValue="") Optional<String> form_postParameterCookiePrefixName,
 
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.AllowedIssuanceDuration", defaultValue="") String AllowedIssuanceDuration,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.AllowedIssuanceDuration", defaultValue="") Optional<String> AllowedIssuanceDuration,
 
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.UseProxy", defaultValue="") String UseProxy,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.ProxyHost", defaultValue="") String ProxyHost,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.ProxyPort", defaultValue="") String ProxyPort,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.ConnectTimeout", defaultValue="") String ConnectTimeout,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.ReadTimeout", defaultValue="") String ReadTimeout,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.UseThreadPool", defaultValue="") String UseThreadPool,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.UseProxy", defaultValue="") Optional<String> UseProxy,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.ProxyHost", defaultValue="") Optional<String> ProxyHost,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.ProxyPort", defaultValue="") Optional<String> ProxyPort,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.ConnectTimeout", defaultValue="") Optional<String> ConnectTimeout,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.ReadTimeout", defaultValue="") Optional<String> ReadTimeout,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.UseThreadPool", defaultValue="") Optional<String> UseThreadPool,
 
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.AuthenticatedURLPath") String AuthenticatedURLPath,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.IgnoreAuthenticationURLPaths", defaultValue="") String IgnoreAuthenticationURLPaths,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.IgnoreAuthenticationURLPathRegex", defaultValue="") String IgnoreAuthenticationURLPathRegex,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.CreateAuthorizationRequestOnlyWhenProtected", defaultValue="") String CreateAuthorizationRequestOnlyWhenProtected,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.IgnoreAuthenticationURLPaths", defaultValue="") Optional<String> IgnoreAuthenticationURLPaths,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.IgnoreAuthenticationURLPathRegex", defaultValue="") Optional<String> IgnoreAuthenticationURLPathRegex,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.CreateAuthorizationRequestOnlyWhenProtected", defaultValue="") Optional<String> CreateAuthorizationRequestOnlyWhenProtected,
 
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.jwks_uri", defaultValue="") String jwks_uri
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.jwks_uri", defaultValue="") Optional<String> jwks_uri
+		) {
+			this(
+				((Issuer != null) && (Issuer.isEmpty() == false)) ? Issuer.get() : null,
+				((AuthorizationEndpoint != null) && (AuthorizationEndpoint.isEmpty() == false)) ? AuthorizationEndpoint.get() : null,
+				((TokenEndpoint != null) && (TokenEndpoint.isEmpty() == false)) ? TokenEndpoint.get() : null,
+				((RevocationEndpoint != null) && (RevocationEndpoint.isEmpty() == false)) ? RevocationEndpoint.get() : null,
+				((response_type != null) && (response_type.isEmpty() == false)) ? response_type.get() : null,
+				((response_mode != null) && (response_mode.isEmpty() == false)) ? response_mode.get() : null,
+				scope.get(),
+				client_id, ClientAuthenticaitonMethod.get(), client_secret.get(),
+				UseSecureCookie.get(), TokenCookieMaxAge.get(), scopeCookieName.get(), redirect_uriCookieName.get(), stateCookieName.get(), nonceCookieName.get(), request_pathCookieName.get(), form_postParameterCookiePrefixName.get(),
+				AllowedIssuanceDuration.get(),
+				UseProxy.get(), ProxyHost.get(), ProxyPort.get(), ConnectTimeout.get(), ReadTimeout.get(), UseThreadPool.get(),
+				AuthenticatedURLPath, IgnoreAuthenticationURLPaths.get(), IgnoreAuthenticationURLPathRegex.get(), CreateAuthorizationRequestOnlyWhenProtected.get(),
+				((jwks_uri != null) && (jwks_uri.isEmpty() == false)) ? jwks_uri.get() : null
+			);
+		}
+
+		/** コンストラクタ。 */
+		public Settings(
+			String Issuer,
+			String AuthorizationEndpoint,
+			String TokenEndpoint,
+			String RevocationEndpoint,
+
+			String response_type,
+			String response_mode,
+
+			String scope,
+
+			String client_id,
+			String ClientAuthenticaitonMethod,
+			String client_secret,
+
+			String UseSecureCookie,
+			String TokenCookieMaxAge,
+			String scopeCookieName,
+			String redirect_uriCookieName,
+			String stateCookieName,
+			String nonceCookieName,
+			String request_pathCookieName,
+			String form_postParameterCookiePrefixName,
+
+			String AllowedIssuanceDuration,
+
+			String UseProxy,
+			String ProxyHost,
+			String ProxyPort,
+			String ConnectTimeout,
+			String ReadTimeout,
+			String UseThreadPool,
+
+			String AuthenticatedURLPath,
+			String IgnoreAuthenticationURLPaths,
+			String IgnoreAuthenticationURLPathRegex,
+			String CreateAuthorizationRequestOnlyWhenProtected,
+
+			String jwks_uri
 		) {
 			super(
 				((Issuer != null) && (Issuer.isEmpty() == false)) ? Issuer : DEFAULT_Issuer,

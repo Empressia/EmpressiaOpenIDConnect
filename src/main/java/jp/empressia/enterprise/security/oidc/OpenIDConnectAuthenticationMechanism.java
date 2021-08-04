@@ -21,6 +21,7 @@ import java.util.Base64;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.regex.Pattern;
@@ -1323,40 +1324,112 @@ public abstract class OpenIDConnectAuthenticationMechanism implements IOpenIDCon
 		public Settings(
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Issuer") String Issuer,
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.AuthorizationEndpoint") String AuthorizationEndpoint,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.TokenEndpoint", defaultValue="") String TokenEndpoint,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.RevocationEndpoint", defaultValue="") String RevocationEndpoint,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.TokenEndpoint", defaultValue="") Optional<String> TokenEndpoint,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.RevocationEndpoint", defaultValue="") Optional<String> RevocationEndpoint,
 
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.response_type", defaultValue="") String response_type,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.response_mode", defaultValue="") String response_mode,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.response_type", defaultValue="") Optional<String> response_type,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.response_mode", defaultValue="") Optional<String> response_mode,
 
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.scope", defaultValue="") String scope,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.scope", defaultValue="") Optional<String> scope,
 
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.client_id") String client_id,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.ClientAuthenticaitonMethod", defaultValue="") String ClientAuthenticaitonMethod,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.client_secret", defaultValue="") String client_secret,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.ClientAuthenticaitonMethod", defaultValue="") Optional<String> ClientAuthenticaitonMethod,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.client_secret", defaultValue="") Optional<String> client_secret,
 
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.UseSecureCookie", defaultValue="") String UseSecureCookie,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.TokenCookieMaxAge", defaultValue="") String TokenCookieMaxAge,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.scopeCookieName", defaultValue="") String scopeCookieName,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.redirect_uriCookieName", defaultValue="") String redirect_uriCookieName,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.stateCookieName", defaultValue="") String stateCookieName,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.nonceCookieName", defaultValue="") String nonceCookieName,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.request_pathCookieName", defaultValue="") String request_pathCookieName,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.form_postParameterCookiePrefixName", defaultValue="") String form_postParameterCookiePrefixName,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.UseSecureCookie", defaultValue="") Optional<String> UseSecureCookie,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.TokenCookieMaxAge", defaultValue="") Optional<String> TokenCookieMaxAge,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.scopeCookieName", defaultValue="") Optional<String> scopeCookieName,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.redirect_uriCookieName", defaultValue="") Optional<String> redirect_uriCookieName,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.stateCookieName", defaultValue="") Optional<String> stateCookieName,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.nonceCookieName", defaultValue="") Optional<String> nonceCookieName,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.request_pathCookieName", defaultValue="") Optional<String> request_pathCookieName,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.form_postParameterCookiePrefixName", defaultValue="") Optional<String> form_postParameterCookiePrefixName,
 
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.AllowedIssuanceDuration", defaultValue="") String AllowedIssuanceDuration,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.AllowedIssuanceDuration", defaultValue="") Optional<String> AllowedIssuanceDuration,
 
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.UseProxy", defaultValue="") String UseProxy,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.ProxyHost", defaultValue="") String ProxyHost,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.ProxyPort", defaultValue="") String ProxyPort,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.ConnectTimeout", defaultValue="") String ConnectTimeout,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.ReadTimeout", defaultValue="") String ReadTimeout,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.UseThreadPool", defaultValue="") String UseThreadPool,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.UseProxy", defaultValue="") Optional<String> UseProxy,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.ProxyHost", defaultValue="") Optional<String> ProxyHost,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.ProxyPort", defaultValue="") Optional<String> ProxyPort,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.ConnectTimeout", defaultValue="") Optional<String> ConnectTimeout,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.ReadTimeout", defaultValue="") Optional<String> ReadTimeout,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.UseThreadPool", defaultValue="") Optional<String> UseThreadPool,
 
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.AuthenticatedURLPath") String AuthenticatedURLPath,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.IgnoreAuthenticationURLPaths", defaultValue="") String IgnoreAuthenticationURLPaths,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.IgnoreAuthenticationURLPathRegex", defaultValue="") String IgnoreAuthenticationURLPathRegex,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.CreateAuthorizationRequestOnlyWhenProtected", defaultValue="") String CreateAuthorizationRequestOnlyWhenProtected
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.IgnoreAuthenticationURLPaths", defaultValue="") Optional<String> IgnoreAuthenticationURLPaths,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.IgnoreAuthenticationURLPathRegex", defaultValue="") Optional<String> IgnoreAuthenticationURLPathRegex,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.CreateAuthorizationRequestOnlyWhenProtected", defaultValue="") Optional<String> CreateAuthorizationRequestOnlyWhenProtected
+		) {
+			this(
+				Issuer,
+				AuthorizationEndpoint,
+				((TokenEndpoint != null) && (TokenEndpoint.isEmpty() == false)) ?  TokenEndpoint.get() : null,
+				((RevocationEndpoint != null) && (RevocationEndpoint.isEmpty() == false)) ? RevocationEndpoint.get() : null,
+				((response_type != null) && (response_type.isEmpty() == false)) ? response_type.get() : null,
+				((response_mode != null) && (response_mode.isEmpty() == false)) ? response_mode.get() : null,
+				((scope != null) && (scope.isEmpty() == false)) ? scope.get() : null,
+				client_id,
+				((ClientAuthenticaitonMethod != null) && (ClientAuthenticaitonMethod.isEmpty() == false)) ? ClientAuthenticaitonMethod.get() : null,
+				((client_secret != null) && (client_secret.isEmpty() == false)) ? client_secret.get() : null,
+				((UseSecureCookie != null) && (UseSecureCookie.isEmpty() == false)) ? UseSecureCookie.get() : null,
+				((TokenCookieMaxAge != null) && (TokenCookieMaxAge.isEmpty() == false)) ? TokenCookieMaxAge.get() : null,
+				((scopeCookieName != null) && (scopeCookieName.isEmpty() == false)) ? scopeCookieName.get() : null,
+				((redirect_uriCookieName != null) && (redirect_uriCookieName.isEmpty() == false)) ? redirect_uriCookieName.get() : null,
+				((stateCookieName != null) && (stateCookieName.isEmpty() == false)) ? stateCookieName.get() : null,
+				((nonceCookieName != null) && (nonceCookieName.isEmpty() == false)) ? nonceCookieName.get() : null,
+				((request_pathCookieName != null) && (request_pathCookieName.isEmpty() == false)) ? request_pathCookieName.get() : null,
+				((form_postParameterCookiePrefixName != null) && (form_postParameterCookiePrefixName.isEmpty() == false)) ? form_postParameterCookiePrefixName.get() : null,
+				((AllowedIssuanceDuration != null) && (AllowedIssuanceDuration.isEmpty() == false)) ? AllowedIssuanceDuration.get() : null,
+				((UseProxy != null) && (UseProxy.isEmpty() == false)) ? UseProxy.get() : null,
+				((ProxyHost != null) && (ProxyHost.isEmpty() == false)) ? ProxyHost.get() : null,
+				((ProxyPort != null) && (ProxyPort.isEmpty() == false)) ? ProxyPort.get() : null,
+				((ConnectTimeout != null) && (ConnectTimeout.isEmpty() == false)) ? ConnectTimeout.get() : null,
+				((ReadTimeout != null) && (ReadTimeout.isEmpty() == false)) ? ReadTimeout.get() : null,
+				((UseThreadPool != null) && (UseThreadPool.isEmpty() == false)) ? UseThreadPool.get() : null,
+				AuthenticatedURLPath,
+				((IgnoreAuthenticationURLPaths != null) && (IgnoreAuthenticationURLPaths.isEmpty() == false)) ? IgnoreAuthenticationURLPaths.get() : null,
+				((IgnoreAuthenticationURLPathRegex != null) && (IgnoreAuthenticationURLPathRegex.isEmpty() == false)) ? IgnoreAuthenticationURLPathRegex.get() : null,
+				((CreateAuthorizationRequestOnlyWhenProtected != null) && (CreateAuthorizationRequestOnlyWhenProtected.isEmpty() == false)) ? CreateAuthorizationRequestOnlyWhenProtected.get() : null
+			);
+		}
+
+		/** コンストラクタ。 */
+		public Settings(
+			String Issuer,
+			String AuthorizationEndpoint,
+			String TokenEndpoint,
+			String RevocationEndpoint,
+
+			String response_type,
+			String response_mode,
+
+			String scope,
+
+			String client_id,
+			String ClientAuthenticaitonMethod,
+			String client_secret,
+
+			String UseSecureCookie,
+			String TokenCookieMaxAge,
+			String scopeCookieName,
+			String redirect_uriCookieName,
+			String stateCookieName,
+			String nonceCookieName,
+			String request_pathCookieName,
+			String form_postParameterCookiePrefixName,
+
+			String AllowedIssuanceDuration,
+
+			String UseProxy,
+			String ProxyHost,
+			String ProxyPort,
+			String ConnectTimeout,
+			String ReadTimeout,
+			String UseThreadPool,
+
+			String AuthenticatedURLPath,
+			String IgnoreAuthenticationURLPaths,
+			String IgnoreAuthenticationURLPathRegex,
+			String CreateAuthorizationRequestOnlyWhenProtected
 		) {
 			this.Issuer = ((Issuer != null) && (Issuer.isEmpty() == false)) ? Issuer : null;
 			this.AuthorizationEndpoint = ((AuthorizationEndpoint != null) && (AuthorizationEndpoint.isEmpty() == false)) ? AuthorizationEndpoint : null;
@@ -1388,7 +1461,7 @@ public abstract class OpenIDConnectAuthenticationMechanism implements IOpenIDCon
 			this.IgnoreAuthenticationURLPathRegex = ((IgnoreAuthenticationURLPathRegex != null) && (IgnoreAuthenticationURLPathRegex.isEmpty() == false)) ? Pattern.compile(IgnoreAuthenticationURLPathRegex) : null;
 			this.CreateAuthorizationRequestOnlyWhenProtected = ((CreateAuthorizationRequestOnlyWhenProtected != null) && (CreateAuthorizationRequestOnlyWhenProtected.isEmpty() == false)) ? Boolean.parseBoolean(CreateAuthorizationRequestOnlyWhenProtected) : DEFAULT_CreateAuthorizationRequestOnlyWhenProtected;
 		}
-
+		
 	}
 
 	/**
