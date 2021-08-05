@@ -1322,8 +1322,8 @@ public abstract class OpenIDConnectAuthenticationMechanism implements IOpenIDCon
 		/** コンストラクタ。 */
 		@Inject
 		public Settings(
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Issuer") String Issuer,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.AuthorizationEndpoint") String AuthorizationEndpoint,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Issuer") Optional<String> Issuer,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.AuthorizationEndpoint") Optional<String> AuthorizationEndpoint,
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.TokenEndpoint", defaultValue="") Optional<String> TokenEndpoint,
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.RevocationEndpoint", defaultValue="") Optional<String> RevocationEndpoint,
 
@@ -1332,7 +1332,7 @@ public abstract class OpenIDConnectAuthenticationMechanism implements IOpenIDCon
 
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.scope", defaultValue="") Optional<String> scope,
 
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.client_id") String client_id,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.client_id") Optional<String> client_id,
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.ClientAuthenticaitonMethod", defaultValue="") Optional<String> ClientAuthenticaitonMethod,
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.client_secret", defaultValue="") Optional<String> client_secret,
 
@@ -1354,20 +1354,20 @@ public abstract class OpenIDConnectAuthenticationMechanism implements IOpenIDCon
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.ReadTimeout", defaultValue="") Optional<String> ReadTimeout,
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.UseThreadPool", defaultValue="") Optional<String> UseThreadPool,
 
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.AuthenticatedURLPath") String AuthenticatedURLPath,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.AuthenticatedURLPath") Optional<String> AuthenticatedURLPath,
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.IgnoreAuthenticationURLPaths", defaultValue="") Optional<String> IgnoreAuthenticationURLPaths,
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.IgnoreAuthenticationURLPathRegex", defaultValue="") Optional<String> IgnoreAuthenticationURLPathRegex,
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.CreateAuthorizationRequestOnlyWhenProtected", defaultValue="") Optional<String> CreateAuthorizationRequestOnlyWhenProtected
 		) {
 			this(
-				Issuer,
-				AuthorizationEndpoint,
+				Issuer.get(),
+				AuthorizationEndpoint.get(),
 				((TokenEndpoint != null) && (TokenEndpoint.isEmpty() == false)) ?  TokenEndpoint.get() : null,
 				((RevocationEndpoint != null) && (RevocationEndpoint.isEmpty() == false)) ? RevocationEndpoint.get() : null,
 				((response_type != null) && (response_type.isEmpty() == false)) ? response_type.get() : null,
 				((response_mode != null) && (response_mode.isEmpty() == false)) ? response_mode.get() : null,
 				((scope != null) && (scope.isEmpty() == false)) ? scope.get() : null,
-				client_id,
+				client_id.get(),
 				((ClientAuthenticaitonMethod != null) && (ClientAuthenticaitonMethod.isEmpty() == false)) ? ClientAuthenticaitonMethod.get() : null,
 				((client_secret != null) && (client_secret.isEmpty() == false)) ? client_secret.get() : null,
 				((UseSecureCookie != null) && (UseSecureCookie.isEmpty() == false)) ? UseSecureCookie.get() : null,
@@ -1385,7 +1385,7 @@ public abstract class OpenIDConnectAuthenticationMechanism implements IOpenIDCon
 				((ConnectTimeout != null) && (ConnectTimeout.isEmpty() == false)) ? ConnectTimeout.get() : null,
 				((ReadTimeout != null) && (ReadTimeout.isEmpty() == false)) ? ReadTimeout.get() : null,
 				((UseThreadPool != null) && (UseThreadPool.isEmpty() == false)) ? UseThreadPool.get() : null,
-				AuthenticatedURLPath,
+				AuthenticatedURLPath.get(),
 				((IgnoreAuthenticationURLPaths != null) && (IgnoreAuthenticationURLPaths.isEmpty() == false)) ? IgnoreAuthenticationURLPaths.get() : null,
 				((IgnoreAuthenticationURLPathRegex != null) && (IgnoreAuthenticationURLPathRegex.isEmpty() == false)) ? IgnoreAuthenticationURLPathRegex.get() : null,
 				((CreateAuthorizationRequestOnlyWhenProtected != null) && (CreateAuthorizationRequestOnlyWhenProtected.isEmpty() == false)) ? CreateAuthorizationRequestOnlyWhenProtected.get() : null

@@ -403,11 +403,11 @@ public class MultipleIssuersOpenIDConnectAuthenticationMechanism implements IOpe
 		@Inject
 		public RedirectedIssurSelector(
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.MultipleIssuers.RedirectedIssurSelector.IssuerParameterName", defaultValue="") Optional<String> IssuerParameterName,
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.MultipleIssuers.RedirectedIssurSelector.IssuerSelectedURLPath") String IssuerSelectedURLPath
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.MultipleIssuers.RedirectedIssurSelector.IssuerSelectedURLPath") Optional<String> IssuerSelectedURLPath
 		) {
 			this(
 				((IssuerParameterName != null) && (IssuerParameterName.isEmpty() == false)) ? IssuerParameterName.get() : null,
-				IssuerSelectedURLPath
+				IssuerSelectedURLPath.get()
 			);
 		}
 
@@ -451,7 +451,14 @@ public class MultipleIssuersOpenIDConnectAuthenticationMechanism implements IOpe
 		/** コンストラクタ。 */
 		@Inject
 		public RedirectIssuerNotSelectedHandler(
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.MultipleIssuers.RedirectIssuerNotSelectedHandler.IssuerSelectionPageURLPath") String IssuerSelectionPageURLPath
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.MultipleIssuers.RedirectIssuerNotSelectedHandler.IssuerSelectionPageURLPath") Optional<String> IssuerSelectionPageURLPath
+		) {
+			this(IssuerSelectionPageURLPath.get());
+		}
+
+		/** コンストラクタ。 */
+		public RedirectIssuerNotSelectedHandler(
+			String IssuerSelectionPageURLPath
 		) {
 			this.IssuerSelectionPageURLPath = IssuerSelectionPageURLPath;
 		}

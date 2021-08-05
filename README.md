@@ -442,6 +442,8 @@ jp.empressia.enterprise.security.oidc.MultipleIssuers.RedirectedIssurSelector.Is
 jp.empressia.enterprise.security.oidc.MultipleIssuers.RedirectIssuerNotSelectedHandler.IssuerSelectionPageURLPath=
 ```
 
+Payara Micro 5.2021.1からは、MicroProfile Config 2.0になっていて、この制限は受けません。  
+
 ## サンプル
 
 * [サンプルプロジェクト](https://github.com/Empressia/EmpressiaOpenIDConnectSample)

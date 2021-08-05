@@ -330,7 +330,7 @@ public class MicrosoftAuthenticationMechanism extends OpenIDConnectAuthenticatio
 
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.scope", defaultValue="") Optional<String> scope,
 
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.client_id") String client_id,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.client_id") Optional<String> client_id,
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.ClientAuthenticaitonMethod", defaultValue="") Optional<String> ClientAuthenticaitonMethod,
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.client_secret", defaultValue="") Optional<String> client_secret,
 
@@ -352,7 +352,7 @@ public class MicrosoftAuthenticationMechanism extends OpenIDConnectAuthenticatio
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.ReadTimeout", defaultValue="") Optional<String> ReadTimeout,
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.UseThreadPool", defaultValue="") Optional<String> UseThreadPool,
 
-			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.AuthenticatedURLPath") String AuthenticatedURLPath,
+			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.Microsoft.AuthenticatedURLPath") Optional<String> AuthenticatedURLPath,
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.IgnoreAuthenticationURLPaths", defaultValue="") Optional<String> IgnoreAuthenticationURLPaths,
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.IgnoreAuthenticationURLPathRegex", defaultValue="") Optional<String> IgnoreAuthenticationURLPathRegex,
 			@ConfigProperty(name="jp.empressia.enterprise.security.oidc.CreateAuthorizationRequestOnlyWhenProtected", defaultValue="") Optional<String> CreateAuthorizationRequestOnlyWhenProtected,
@@ -366,12 +366,29 @@ public class MicrosoftAuthenticationMechanism extends OpenIDConnectAuthenticatio
 				((RevocationEndpoint != null) && (RevocationEndpoint.isEmpty() == false)) ? RevocationEndpoint.get() : null,
 				((response_type != null) && (response_type.isEmpty() == false)) ? response_type.get() : null,
 				((response_mode != null) && (response_mode.isEmpty() == false)) ? response_mode.get() : null,
-				scope.get(),
-				client_id, ClientAuthenticaitonMethod.get(), client_secret.get(),
-				UseSecureCookie.get(), TokenCookieMaxAge.get(), scopeCookieName.get(), redirect_uriCookieName.get(), stateCookieName.get(), nonceCookieName.get(), request_pathCookieName.get(), form_postParameterCookiePrefixName.get(),
-				AllowedIssuanceDuration.get(),
-				UseProxy.get(), ProxyHost.get(), ProxyPort.get(), ConnectTimeout.get(), ReadTimeout.get(), UseThreadPool.get(),
-				AuthenticatedURLPath, IgnoreAuthenticationURLPaths.get(), IgnoreAuthenticationURLPathRegex.get(), CreateAuthorizationRequestOnlyWhenProtected.get(),
+				((scope != null) && (scope.isEmpty() == false)) ? scope.get() : null,
+				client_id.get(),
+				((ClientAuthenticaitonMethod != null) && (ClientAuthenticaitonMethod.isEmpty() == false)) ? ClientAuthenticaitonMethod.get() : null,
+				((client_secret != null) && (client_secret.isEmpty() == false)) ? client_secret.get() : null,
+				((UseSecureCookie != null) && (UseSecureCookie.isEmpty() == false)) ? UseSecureCookie.get() : null,
+				((TokenCookieMaxAge != null) && (TokenCookieMaxAge.isEmpty() == false)) ? TokenCookieMaxAge.get() : null,
+				((scopeCookieName != null) && (scopeCookieName.isEmpty() == false)) ? scopeCookieName.get() : null,
+				((redirect_uriCookieName != null) && (redirect_uriCookieName.isEmpty() == false)) ? redirect_uriCookieName.get() : null,
+				((stateCookieName != null) && (stateCookieName.isEmpty() == false)) ? stateCookieName.get() : null,
+				((nonceCookieName != null) && (nonceCookieName.isEmpty() == false)) ? nonceCookieName.get() : null,
+				((request_pathCookieName != null) && (request_pathCookieName.isEmpty() == false)) ? request_pathCookieName.get() : null,
+				((form_postParameterCookiePrefixName != null) && (form_postParameterCookiePrefixName.isEmpty() == false)) ? form_postParameterCookiePrefixName.get() : null,
+				((AllowedIssuanceDuration != null) && (AllowedIssuanceDuration.isEmpty() == false)) ? AllowedIssuanceDuration.get() : null,
+				((UseProxy != null) && (UseProxy.isEmpty() == false)) ? UseProxy.get() : null,
+				((ProxyHost != null) && (ProxyHost.isEmpty() == false)) ? ProxyHost.get() : null,
+				((ProxyPort != null) && (ProxyPort.isEmpty() == false)) ? ProxyPort.get() : null,
+				((ConnectTimeout != null) && (ConnectTimeout.isEmpty() == false)) ? ConnectTimeout.get() : null,
+				((ReadTimeout != null) && (ReadTimeout.isEmpty() == false)) ? ReadTimeout.get() : null,
+				((UseThreadPool != null) && (UseThreadPool.isEmpty() == false)) ? UseThreadPool.get() : null,
+				AuthenticatedURLPath.get(),
+				((IgnoreAuthenticationURLPaths != null) && (IgnoreAuthenticationURLPaths.isEmpty() == false)) ? IgnoreAuthenticationURLPaths.get() : null,
+				((IgnoreAuthenticationURLPathRegex != null) && (IgnoreAuthenticationURLPathRegex.isEmpty() == false)) ? IgnoreAuthenticationURLPathRegex.get() : null,
+				((CreateAuthorizationRequestOnlyWhenProtected != null) && (CreateAuthorizationRequestOnlyWhenProtected.isEmpty() == false)) ? CreateAuthorizationRequestOnlyWhenProtected.get() : null,
 				((jwks_uri != null) && (jwks_uri.isEmpty() == false)) ? jwks_uri.get() : null
 			);
 		}
